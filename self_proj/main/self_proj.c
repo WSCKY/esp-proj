@@ -17,6 +17,7 @@
 #define LED_GPIO_PIN     CONFIG_USR_LED_GPIO
 
 static const char *TAG = "self-proj";
+static const char *sTAG = "TEST-LEVEL";
 
 void app_main()
 {
@@ -39,11 +40,26 @@ void app_main()
 	/* Set the GPIO as a push/pull output */
 	gpio_set_direction(LED_GPIO_PIN, GPIO_MODE_OUTPUT);
 
+	/* esp log print test */
 	ESP_LOGE(TAG, "This is Error Information");
 	ESP_LOGW(TAG, "This is Warning Information");
 	ESP_LOGI(TAG, "Normal Information");
 	ESP_LOGD(TAG, "Debug Information"); /* use 'make menuconfig' to show it. */
 	ESP_LOGV(TAG, "Verbose Information"); /* use 'make menuconfig' to show it. */
+
+	/* test: esp log level settings */
+	esp_log_level_set(sTAG, ESP_LOG_ERROR);
+	ESP_LOGE(sTAG, "log level is ERROR");
+	ESP_LOGW(sTAG, "log level is ERROR");
+	ESP_LOGI(sTAG, "log level is ERROR");
+	esp_log_level_set(sTAG, ESP_LOG_WARN);
+	ESP_LOGE(sTAG, "log level is WARNING");
+	ESP_LOGW(sTAG, "log level is WARNING");
+	ESP_LOGI(sTAG, "log level is WARNING");
+	esp_log_level_set(sTAG, ESP_LOG_INFO);
+	ESP_LOGE(sTAG, "log level is INFORMATION");
+	ESP_LOGW(sTAG, "log level is INFORMATION");
+	ESP_LOGI(sTAG, "log level is INFORMATION");
 
 	printf("flash led ...\n");
 	while(1) {
