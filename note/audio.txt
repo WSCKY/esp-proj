@@ -1,0 +1,20 @@
+play_mp3_example:                          play_sdcard_mp3_example:                     element_sdcard_mp3_example:
+1>     audio_hal_init                      1>     esp_periph_init                     1>     esp_periph_init
+2>     audio_pipeline_init                 1.1>   periph_sdcard_init                  1.1>   periph_sdcard_init
+2.1>   mp3_decoder_init                    1.2>   esp_periph_start    (mount)         1.2>   esp_periph_start    (mount)
+2.2>   i2s_stream_init                     1.3>   periph_sdcard_is_mounted            1.3>   periph_sdcard_is_mounted
+2.3>   audio_pipeline_register (2)         2>     audio_hal_init                      2>     audio_hal_init
+2.4>   audio_pipeline_link                 3>     audio_pipeline_init                 3>     i2s_stream_init
+3>     audio_event_iface_init              3.1>   fatfs_stream_init                   3.1>   mp3_decoder_init
+3.1>   audio_pipeline_set_listener         3.2>   i2s_stream_init                     3.2>   audio_element_set_read_cb
+4>     audio_pipeline_run(pipeline);       3.3>   mp3_decoder_init                    3.3>   rb_create(8192, 1);
+                                           3.4>   audio_pipeline_register (3)         3.4>   audio_element_set_input_ringbuf
+while(1)                                   3.5>   audio_pipeline_link                        audio_element_set_output_ringbuf
+    audio_event_iface_listen               3.6>   audio_element_set_uri                      audio_element_get_event_queue
+                                           4>     audio_event_iface_init                     xQueueAddToSet
+                                           4.1>   audio_pipeline_set_listener         3.5>   audio_element_run(i2s_stream_writer)
+                                           4.2>   audio_event_iface_set_listener             audio_element_run(mp3_decoder);
+                                           5>     audio_pipeline_run(pipeline);        
+                                                                                      While(xQueueSelectFromSet)
+                                           while(1)                                       xQueueReceive
+                                               audio_event_iface_listen
