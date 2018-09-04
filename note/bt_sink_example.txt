@@ -1,0 +1,272 @@
+play_bt_music_example startup log: (ESP32_LyraT V4.3)
+
+ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x3f (SPI_FAST_FLASH_BOOT)
+flash read err, 1000
+ets_main.c 371 
+ets Jun  8 2016 00:22:57
+
+rst:0x10 (RTCWDT_RTC_RESET),boot:0x3f (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:1
+load:0x3fff0018,len:4
+load:0x3fff001c,len:5576
+load:0x40078000,len:0
+ho 12 tail 0 room 4
+load:0x40078000,len:13744
+entry 0x40078fb0
+I (30) boot: ESP-IDF v3.0.1 2nd stage bootloader
+I (30) boot: compile time 14:12:08
+I (36) boot: Enabling RNG early entropy source...
+I (36) boot: SPI Speed      : 80MHz
+I (39) boot: SPI Mode       : DIO
+I (43) boot: SPI Flash Size : 4MB
+I (47) boot: Partition Table:
+I (51) boot: ## Label            Usage          Type ST Offset   Length
+I (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (65) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (73) boot:  2 factory          factory app      00 00 00010000 00100000
+I (80) boot: End of partition table
+I (84) esp_image: segment 0: paddr=0x00010020 vaddr=0x3f400020 size=0x3971c (235292) map
+I (162) esp_image: segment 1: paddr=0x00049744 vaddr=0x3ffc0000 size=0x02a0c ( 10764) load
+I (166) esp_image: segment 2: paddr=0x0004c158 vaddr=0x40080000 size=0x00400 (  1024) load
+0x40080000: _WindowOverflow4 at /home/kychu/ESPRESSIF/esp-adf/esp-idf/components/freertos/./xtensa_vectors.S:1685
+
+I (169) esp_image: segment 3: paddr=0x0004c560 vaddr=0x40080400 size=0x03ab0 ( 15024) load
+I (183) esp_image: segment 4: paddr=0x00050018 vaddr=0x400d0018 size=0x8ba50 (571984) map
+0x400d0018: _flash_cache_start at ??:?
+
+I (353) esp_image: segment 5: paddr=0x000dba70 vaddr=0x40083eb0 size=0x0baa8 ( 47784) load
+0x40083eb0: lock_acquire_generic at /home/kychu/ESPRESSIF/esp-adf/esp-idf/components/newlib/./locks.c:134 (discriminator 1)
+
+I (370) esp_image: segment 6: paddr=0x000e7520 vaddr=0x400c0000 size=0x00000 (     0) load
+I (379) boot: Loaded app from partition at offset 0x10000
+I (379) boot: Disabling RNG early entropy source...
+I (382) cpu_start: Pro cpu up.
+I (385) cpu_start: Starting app cpu, entry point is 0x40081014
+0x40081014: call_start_cpu1 at /home/kychu/ESPRESSIF/esp-adf/esp-idf/components/esp32/./cpu_start.c:215
+
+I (0) cpu_start: App cpu up.
+I (396) heap_init: Initializing. RAM available for dynamic allocation:
+I (402) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM
+I (409) heap_init: At 3FFCF408 len 00010BF8 (66 KiB): DRAM
+I (415) heap_init: At 3FFE0440 len 00003BC0 (14 KiB): D/IRAM
+I (421) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM
+I (427) heap_init: At 4008F958 len 000106A8 (65 KiB): IRAM
+I (434) cpu_start: Pro cpu start user code
+I (115) cpu_start: Starting scheduler on PRO CPU.
+I (0) cpu_start: Starting scheduler on APP CPU.
+I (203) BLUETOOTH_EXAMPLE: [ 1 ] Create Bluetooth service
+I (203) BTDM_INIT: BT controller compile version [8c18895]
+
+I (203) system_api: Base MAC address is not set, read default base MAC address from BLK0 of EFUSE
+I (523) phy: phy_version: 3662, 711a97c, May  9 2018, 14:29:06, 0, 0
+I (563) BLUETOOTH_EXAMPLE: [ 2 ] Start codec chip
+I (563) gpio: GPIO[19]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:3 
+I (583) ES8388_DRIVER: init,out:02, in:00
+I (583) gpio: GPIO[21]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (583) AUDIO_HAL: Codec mode is 2, Ctrl:1
+I (593) BLUETOOTH_EXAMPLE: [ 3 ] Create audio pipeline for playback
+I (603) BLUETOOTH_EXAMPLE: [3.1] Create i2s stream to write data to codec chip
+I (613) I2S: DMA Malloc info, datalen=blocksize=1200, dma_buf_count=3
+I (613) I2S: DMA Malloc info, datalen=blocksize=1200, dma_buf_count=3
+I (623) I2S: APLL: Req RATE: 44100, real rate: 43945.016, BITS: 16, CLKM: 1, BCK: 8, MCLK: 11289966.924, SCLK: 1406240.500000, diva: 1, divb: 0
+I (633) BLUETOOTH_EXAMPLE: [3.2] Get Bluetooth stream
+I (643) BLUETOOTH_EXAMPLE: [3.2] Register all elements to audio pipeline
+I (653) BLUETOOTH_EXAMPLE: [3.3] Link it together [Bluetooth]-->bt_stream_reader-->i2s_stream_writer-->[codec_chip]
+I (663) BLUETOOTH_EXAMPLE: [ 4 ] Initialize peripherals
+E (663) gpio: gpio_install_isr_service(406): GPIO isr service already installed
+I (673) BLUETOOTH_EXAMPLE: [4.1] Initialize Touch peripheral
+I (683) BLUETOOTH_EXAMPLE: [4.2] Create Bluetooth peripheral
+I (683) BLUETOOTH_EXAMPLE: [4.2] Start all peripherals
+I (693) BLUETOOTH_EXAMPLE: [ 5 ] Setup event listener
+I (693) BLUETOOTH_EXAMPLE: [5.1] Listening event from all elements of pipeline
+I (703) BLUETOOTH_EXAMPLE: [5.2] Listening event from peripherals
+I (713) BLUETOOTH_EXAMPLE: [ 6 ] Start audio_pipeline
+I (713) AUDIO_ELEMENT: [bt] Element task created
+I (723) AUDIO_ELEMENT: [i2s] Element task created
+I (733) AUDIO_PIPELINE: Func:audio_pipeline_run, Line:260, MEM Total:117724 Bytes
+
+I (733) AUDIO_ELEMENT: [i2s] AEL_MSG_CMD_RESUME,state:1
+I (743) I2S_STREAM: AUDIO_STREAM_WRITER
+I (743) AUDIO_PIPELINE: Pipeline started
+I (753) BLUETOOTH_EXAMPLE: [ 7 ] Listen for all pipeline events
+E (6483) BT: btm_sec_conn_req
+
+E (6503) BT: btm_sec_connected
+
+E (6873) BT: bta_av_rc_opened rcb[0] shdl:0 lidx:3/0
+E (6873) BT: rcb[0].lidx=3, lcb.conn_msk=x1
+E (6893) BT: process_service_search_attr_rsp
+
+E (6913) BT: bta_av_rc_create ACP handle exist for shdl:0
+I (6923) BLUETOOTH_EXAMPLE: [ * ] Receive music info from Bluetooth, sample_rates=44100, bits=16, ch=2
+E (6943) BT: bta_dm_rm_cback:0, status:0
+I (6953) I2S: APLL: Req RATE: 44100, real rate: 43945.016, BITS: 16, CLKM: 1, BCK: 8, MCLK: 11289966.924, SCLK: 1406240.500000, diva: 1, divb: 0
+I (6953) AUDIO_ELEMENT: [i2s] AEL_MSG_CMD_RESUME,state:3
+I (6963) I2S_STREAM: AUDIO_STREAM_WRITER
+E (6963) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048585, source:0x3ffe04c4 cmd:1, data:0x0, data_len:0
+E (7013) BT: process_service_search_attr_rsp
+
+E (10713) BT: process_service_search_attr_rsp
+
+E (13873) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x7, data_len:0
+I (13873) BLUETOOTH_EXAMPLE: [ * ] [Vol+] touch tap event
+E (13873) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (13893) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (14263) BT: bta_av_proc_stream_evt: p_data is null
+E (14263) BT: bta_av_link_role_ok hndl:x41 role:1 conn_audio:x1 bits:1 features:x824b
+
+E (14273) BT: bta_dm_rm_cback:0, status:0
+E (14273) BT: bta_dm_rm_cback:0, status:7
+E (14283) BT: BTA_AV_START_EVT status 0, suspending 0, init 0
+
+E (14653) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x7, data_len:0
+I (14653) BLUETOOTH_EXAMPLE: [ * ] [Vol+] touch tap event
+E (14653) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (14683) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (17833) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x7, data_len:0
+I (17833) BLUETOOTH_EXAMPLE: [ * ] [Vol+] touch tap event
+E (17833) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (17863) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (20693) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x7, data_len:0
+I (20693) BLUETOOTH_EXAMPLE: [ * ] [Vol+] touch tap event
+E (20693) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (20723) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (29373) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x8, data_len:0
+I (29373) BLUETOOTH_EXAMPLE: [ * ] [Play] touch tap event
+E (29373) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (29383) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (31113) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x8, data_len:0
+I (31113) BLUETOOTH_EXAMPLE: [ * ] [Play] touch tap event
+E (31113) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (31163) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (33273) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x8, data_len:0
+I (33273) BLUETOOTH_EXAMPLE: [ * ] [Play] touch tap event
+E (33273) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (33313) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (36753) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x8, data_len:0
+I (36753) BLUETOOTH_EXAMPLE: [ * ] [Play] touch tap event
+E (36753) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (36783) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (38833) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x9, data_len:0
+I (38833) BLUETOOTH_EXAMPLE: [ * ] [Set] touch tap event
+E (38843) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (38883) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (40873) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x9, data_len:0
+I (40873) BLUETOOTH_EXAMPLE: [ * ] [Set] touch tap event
+E (40873) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (40893) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (46753) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x4, data_len:0
+I (46753) BLUETOOTH_EXAMPLE: [ * ] [Vol-] touch tap event
+E (46763) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (46793) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (47903) BT: Pkt dropped
+
+E (48793) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x7, data_len:0
+I (48793) BLUETOOTH_EXAMPLE: [ * ] [Vol+] touch tap event
+E (48793) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (48813) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (50713) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x7, data_len:0
+I (50713) BLUETOOTH_EXAMPLE: [ * ] [Vol+] touch tap event
+E (50713) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (50743) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (52153) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x4, data_len:0
+I (52153) BLUETOOTH_EXAMPLE: [ * ] [Vol-] touch tap event
+E (52153) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (52223) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (53233) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x4, data_len:0
+I (53233) BLUETOOTH_EXAMPLE: [ * ] [Vol-] touch tap event
+E (53233) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (53253) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (54493) BT: Pkt dropped
+
+E (59693) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x7, data_len:0
+I (59693) BLUETOOTH_EXAMPLE: [ * ] [Vol+] touch tap event
+E (59693) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (59753) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (61643) BT: Pkt dropped
+
+E (67403) BT: Pkt dropped
+
+E (74953) BT: Pkt dropped
+
+E (81223) BT: Pkt dropped
+
+E (87863) BT: Pkt dropped
+
+E (94133) BT: Pkt dropped
+
+E (101303) BT: Pkt dropped
+
+E (107883) BT: Pkt dropped
+
+E (114593) BT: Pkt dropped
+
+E (120393) BT: Pkt dropped
+
+E (127663) BT: Pkt dropped
+
+E (134203) BT: Pkt dropped
+
+E (140873) BT: Pkt dropped
+
+E (146843) BT: Pkt dropped
+
+E (154013) BT: Pkt dropped
+
+E (160193) BT: Pkt dropped
+
+E (166903) BT: Pkt dropped
+
+E (169013) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x8, data_len:0
+I (169013) BLUETOOTH_EXAMPLE: [ * ] [Play] touch tap event
+E (169013) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (169053) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (172893) BT: Pkt dropped
+
+E (176253) BT: bta_av_proc_stream_evt: p_data is null
+E (176253) BT: bta_dm_rm_cback:0, status:6
+E (176253) BT: BTA_AV_SUSPEND_EVT status 0, init 0
+
+E (325673) BLUETOOTH_EXAMPLE: [ * ] Action command error: src_type:1048578, source:0x3ffe045c cmd:1, data:0x8, data_len:0
+I (325673) BLUETOOTH_EXAMPLE: [ * ] [Play] touch tap event
+E (325673) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (326133) BT: btc_avrc_ct_send_passthrough_cmd: succesfully sent passthrough command to BTA
+E (326153) BT: bta_av_proc_stream_evt: p_data is null
+E (326153) BT: bta_av_link_role_ok hndl:x41 role:1 conn_audio:x1 bits:1 features:x824b
+
+E (326163) BT: bta_dm_rm_cback:0, status:0
+E (326163) BT: bta_dm_rm_cback:0, status:7
+E (326173) BT: BTA_AV_START_EVT status 0, suspending 0, init 0
+
+E (358533) BT: Pkt dropped
+
+E (365183) BT: Pkt dropped
+
+E (372403) BT: Pkt dropped
+
+E (378883) BT: Pkt dropped
+
+E (384683) BT: Pkt dropped
+
+E (391903) BT: Pkt dropped
+
+E (409963) BT: Pkt dropped
+
+E (415413) BT: bta_av_proc_stream_evt: p_data is null
+E (415413) BT: bta_dm_rm_cback:0, status:6
+E (415423) BT: BTA_AV_SUSPEND_EVT status 0, init 0
+
+E (421213) BT: bta_av_proc_stream_evt: p_data is null
+E (421213) BT: bta_av_link_role_ok hndl:x41 role:1 conn_audio:x1 bits:1 features:x824b
+
+E (421213) BT: bta_dm_rm_cback:0, status:0
+E (421223) BT: bta_dm_rm_cback:0, status:7
+E (421223) BT: BTA_AV_START_EVT status 0, suspending 0, init 0
+
+E (455543) BT: Pkt dropped
+
+
