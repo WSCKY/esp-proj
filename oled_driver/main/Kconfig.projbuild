@@ -8,6 +8,8 @@ choice LCD_TYPE
 
 config LCD_TYPE_AUTO
 	bool "Auto detect"
+config LCD_TYPE_SSD1306
+	bool "SSD1306 (OLED driver)"
 config LCD_TYPE_ST7789V
 	bool "ST7789V (WROVER Kit v2 or v3)"
 config LCD_TYPE_ILI9341
