@@ -123,44 +123,6 @@ static esp_err_t i2c_example_master_write_slave(i2c_port_t i2c_num, uint8_t* dat
 }
 
 /**
- * @brief test code to write esp-i2c-slave
- *
- * 1. set mode
- * _________________________________________________________________
- * | start | slave_addr + wr_bit + ack | write 1 byte + ack  | stop |
- * --------|---------------------------|---------------------|------|
- * 2. wait more than 24 ms
- * 3. read data
- * ______________________________________________________________________________________
- * | start | slave_addr + rd_bit + ack | read 1 byte + ack  | read 1 byte + nack | stop |
- * --------|---------------------------|--------------------|--------------------|------|
- */
-static esp_err_t i2c_example_master_sensor_test(i2c_port_t i2c_num, uint8_t* data_h, uint8_t* data_l)
-{
-    int ret;
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, BH1750_SENSOR_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, BH1750_CMD_START, ACK_CHECK_EN);
-    i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
-    i2c_cmd_link_delete(cmd);
-    if (ret != ESP_OK) {
-        return ret;
-    }
-    vTaskDelay(30 / portTICK_RATE_MS);
-    cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, BH1750_SENSOR_ADDR << 1 | READ_BIT, ACK_CHECK_EN);
-    i2c_master_read_byte(cmd, data_h, ACK_VAL);
-    i2c_master_read_byte(cmd, data_l, NACK_VAL);
-    i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
-    i2c_cmd_link_delete(cmd);
-    return ret;
-}
-
-/**
  * @brief i2c master initialization
  */
 static void i2c_example_master_init()
@@ -222,26 +184,9 @@ static void i2c_test_task(void* arg)
     uint8_t* data = (uint8_t*) malloc(DATA_LENGTH);
     uint8_t* data_wr = (uint8_t*) malloc(DATA_LENGTH);
     uint8_t* data_rd = (uint8_t*) malloc(DATA_LENGTH);
-    uint8_t sensor_data_h, sensor_data_l;
     int cnt = 0;
     while (1) {
         printf("test cnt: %d\n", cnt++);
-//        ret = i2c_example_master_sensor_test( I2C_EXAMPLE_MASTER_NUM, &sensor_data_h, &sensor_data_l);
-//        xSemaphoreTake(print_mux, portMAX_DELAY);
-//        if(ret == ESP_ERR_TIMEOUT) {
-//            printf("I2C timeout\n");
-//        } else if(ret == ESP_OK) {
-//            printf("*******************\n");
-//            printf("TASK[%d]  MASTER READ SENSOR( BH1750 )\n", task_idx);
-//            printf("*******************\n");
-//            printf("data_h: %02x\n", sensor_data_h);
-//            printf("data_l: %02x\n", sensor_data_l);
-//            printf("sensor val: %f\n", (sensor_data_h << 8 | sensor_data_l) / 1.2);
-//        } else {
-//            printf("%s: No ack, sensor not connected...skip...\n", esp_err_to_name(ret));
-//        }
-//        xSemaphoreGive(print_mux);
-//        vTaskDelay(( DELAY_TIME_BETWEEN_ITEMS_MS * ( task_idx + 1 ) ) / portTICK_RATE_MS);
         //---------------------------------------------------
         for (i = 0; i < DATA_LENGTH; i++) {
             data[i] = i;
