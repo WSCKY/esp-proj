@@ -369,12 +369,15 @@ static void oled_drawchar(uint8_t x, uint8_t y, uint8_t c, uint8_t mode)
 	}
 }
 
-static void oled_draw_test(spi_device_handle_t spi)
+static void oled_drawstring(uint8_t x, uint8_t y, char *Text, uint8_t mode)
 {
-	int x;
-	for(x = 0; x < 128; x += 2)
-		OLED_GRAM[0][x] = 0xFF;
-	oled_refresh_gram(spi);
+	if((y + current_font->Height) < 64) {
+		while((*Text != 0) && ((x + current_font->Width) < 128)) {
+			oled_drawchar(x, y, *Text, mode);
+			Text ++;
+			x += current_font->Width;
+		}
+	}
 }
 
 #else
@@ -518,8 +521,6 @@ void app_main()
     printf("clear oled screen.\n");
     oled_clear(spi);
     vTaskDelay(1000 / portTICK_RATE_MS);
-    printf("draw gram test.\n");
-    oled_draw_test(spi);
     printf("draw a point at col: 60, row: 33.\n");
     oled_drawpoint(60, 33, 1);
     printf("draw any characters.\n");
@@ -529,8 +530,15 @@ void app_main()
     oled_setfont(&Font24x12);
     printf("current font size: Width: %d, Height: %d.\n", oled_getfont()->Width, oled_getfont()->Height);
     oled_drawchar(30, 10, 'A', 1);
+    printf("set font to Font12x6.\n");
     oled_setfont(&Font12x6);
     oled_drawchar(50, 10, 'S', 1);
+    printf("Show string: Hello kyChu! \n");
+    oled_drawstring(0, 35, "Hello kyChu!", 1);
+    oled_drawstring(37, 0, "Hello kyChu!-37", 1);
+    oled_drawstring(38, 12, "Hello kyChu!-38", 1);
+    oled_drawstring(0, 51, "Hello kyChu!-51", 1);
+    oled_drawstring(0, 52, "Hello kyChu!-52", 1);
     oled_refresh_gram(spi);
 #else
     //Initialize the effect displayed
