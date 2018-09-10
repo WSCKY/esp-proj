@@ -337,21 +337,27 @@ static void oled_drawpoint(uint8_t x, uint8_t y, uint8_t mode)
 	if(mode) OLED_GRAM[7 - y / 8][x] |= 0x01 << (7 - (y % 8));
 }
 
-static void oled_drawchar(uint8_t x, uint8_t y, uint8_t c, const type_font_t* f, uint8_t mode)
+static type_font_t* current_font = (type_font_t *)&Font16x8;
+static void oled_setfont(const type_font_t *pFont)
+{
+	current_font = (type_font_t *)pFont;
+}
+
+static void oled_drawchar(uint8_t x, uint8_t y, uint8_t c, uint8_t mode)
 {
 	uint8_t i, j;
-	uint8_t bytes = (f->Height / 8 + ((f->Height % 8) ? 1 : 0)) * (f->Width);
+	uint8_t bytes = (current_font->Height / 8 + ((current_font->Height % 8) ? 1 : 0)) * (current_font->Width);
 	uint8_t line_start = y;
 	uint8_t tmp;
 	c = c - ' ';
 	for(i = 0; i < bytes; i ++) {
-		tmp = f->table[c * bytes + i];
+		tmp = current_font->table[c * bytes + i];
 		for(j = 0; j < 8; j ++) {
 			if(tmp & 0x80) oled_drawpoint(x, y, mode);
 			else oled_drawpoint(x, y, !mode);
 			tmp <<= 1;
 			y ++;
-			if((y - line_start) == f->Height) {
+			if((y - line_start) == current_font->Height) {
 				y = line_start; x ++; break;
 			}
 		}
@@ -509,10 +515,15 @@ void app_main()
     vTaskDelay(1000 / portTICK_RATE_MS);
     printf("draw gram test.\n");
     oled_draw_test(spi);
-    printf("draw a point at col: 60, row: 33");
+    printf("draw a point at col: 60, row: 33.\n");
     oled_drawpoint(60, 33, 1);
-    printf("draw a characters at (10, 10)");
-    oled_drawchar(10, 10, 'Y', &Font16x8, 1);
+    printf("draw any characters.\n");
+    oled_drawchar(10, 10, 'K', 1);
+    oled_drawchar(18, 10, 'Y', 0);
+    oled_setfont(&Font24x12);
+    oled_drawchar(30, 10, 'A', 1);
+    oled_setfont(&Font12x6);
+    oled_drawchar(50, 10, 'S', 1);
     oled_refresh_gram(spi);
 #else
     //Initialize the effect displayed
