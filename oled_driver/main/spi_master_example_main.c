@@ -16,6 +16,7 @@
 #include "soc/gpio_struct.h"
 #include "driver/gpio.h"
 
+#include "font.h"
 #include "pretty_effect.h"
 
 /*
@@ -336,6 +337,27 @@ static void oled_drawpoint(uint8_t x, uint8_t y, uint8_t mode)
 	if(mode) OLED_GRAM[7 - y / 8][x] |= 0x01 << (7 - (y % 8));
 }
 
+static void oled_drawchar(uint8_t x, uint8_t y, uint8_t c, const type_font_t* f, uint8_t mode)
+{
+	uint8_t i, j;
+	uint8_t bytes = (f->Height / 8 + ((f->Height % 8) ? 1 : 0)) * (f->Width);
+	uint8_t line_start = y;
+	uint8_t tmp;
+	c = c - ' ';
+	for(i = 0; i < bytes; i ++) {
+		tmp = f->table[c * bytes + i];
+		for(j = 0; j < 8; j ++) {
+			if(tmp & 0x80) oled_drawpoint(x, y, mode);
+			else oled_drawpoint(x, y, !mode);
+			tmp <<= 1;
+			y ++;
+			if((y - line_start) == f->Height) {
+				y = line_start; x ++; break;
+			}
+		}
+	}
+}
+
 static void oled_draw_test(spi_device_handle_t spi)
 {
 	int x;
@@ -489,6 +511,8 @@ void app_main()
     oled_draw_test(spi);
     printf("draw a point at col: 60, row: 33");
     oled_drawpoint(60, 33, 1);
+    printf("draw a characters at (10, 10)");
+    oled_drawchar(10, 10, 'Y', &Font16x8, 1);
     oled_refresh_gram(spi);
 #else
     //Initialize the effect displayed
