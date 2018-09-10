@@ -54,8 +54,13 @@ typedef struct {
 typedef enum {
     LCD_TYPE_ILI = 1,
     LCD_TYPE_ST,
+	LCD_TYPE_OLED,
     LCD_TYPE_MAX,
 } type_lcd_t;
+
+#if defined( CONFIG_LCD_TYPE_SSD1306 )
+  unsigned char OLED_GRAM[8][128] = {0};
+#endif
 
 //Place data into DRAM. Constant data gets placed into DROM by default, which is not accessible by DMA.
 DRAM_ATTR static const lcd_init_cmd_t st_init_cmds[]={
@@ -152,6 +157,35 @@ DRAM_ATTR static const lcd_init_cmd_t ili_init_cmds[]={
     {0, {0}, 0xff},
 };
 
+DRAM_ATTR static const lcd_init_cmd_t oled_init_cmds[]={
+    {0xAE, {0}, 0},
+	{0xD5, {0}, 0},
+	{0x50, {0}, 0},
+	{0xA8, {0}, 0},
+	{0x3F, {0}, 0},
+	{0xD3, {0}, 0},
+	{0x00, {0}, 0},
+	{0x40, {0}, 0},
+	{0x8D, {0}, 0},
+	{0x14, {0}, 0},
+	{0x20, {0}, 0},
+	{0x02, {0}, 0},
+	{0xA1, {0}, 0},
+	{0xC0, {0}, 0},
+	{0xDA, {0}, 0},
+	{0x12, {0}, 0},
+	{0x81, {0}, 0},
+	{0xEF, {0}, 0},
+	{0xD9, {0}, 0},
+	{0xF1, {0}, 0},
+	{0xDB, {0}, 0},
+	{0x30, {0}, 0},
+	{0xA4, {0}, 0},
+	{0xA6, {0}, 0},
+	{0xAF, {0}, 0},
+	{0, {0}, 0xff},
+};
+
 //Send a command to the LCD. Uses spi_device_transmit, which waits until the transfer is complete.
 void lcd_cmd(spi_device_handle_t spi, const uint8_t cmd)
 {
@@ -189,6 +223,9 @@ void lcd_spi_pre_transfer_callback(spi_transaction_t *t)
 
 uint32_t lcd_get_id(spi_device_handle_t spi)
 {
+#if defined( CONFIG_LCD_TYPE_SSD1306 )
+	return 0x1306;
+#else
     //get_id cmd
     lcd_cmd( spi, 0x04);
 
@@ -202,6 +239,7 @@ uint32_t lcd_get_id(spi_device_handle_t spi)
     assert( ret == ESP_OK );
 
     return *(uint32_t*)t.rx_data;
+#endif
 }
 
 //Initialize the display
@@ -223,22 +261,24 @@ void lcd_init(spi_device_handle_t spi)
 
     //detect LCD type
     uint32_t lcd_id = lcd_get_id(spi);
-    int lcd_detected_type = 0;
     int lcd_type;
 
     printf("LCD ID: %08X\n", lcd_id);
     if ( lcd_id == 0 ) {
         //zero, ili
-        lcd_detected_type = LCD_TYPE_ILI;
         printf("ILI9341 detected.\n");
+    } else if (lcd_id == 0x1306) {
+        printf("SSD1306 detected.\n");
     } else {
         // none-zero, ST
-        lcd_detected_type = LCD_TYPE_ST;
         printf("ST7789V detected.\n");
     }
 
 #ifdef CONFIG_LCD_TYPE_AUTO
     lcd_type = lcd_detected_type;
+#elif defined( CONFIG_LCD_TYPE_SSD1306 )
+    printf("kconfig: force CONFIG_LCD_TYPE_SSD1306.\n");
+    lcd_type = LCD_TYPE_OLED;
 #elif defined( CONFIG_LCD_TYPE_ST7789V )
     printf("kconfig: force CONFIG_LCD_TYPE_ST7789V.\n");
     lcd_type = LCD_TYPE_ST;
@@ -249,6 +289,9 @@ void lcd_init(spi_device_handle_t spi)
     if ( lcd_type == LCD_TYPE_ST ) {
         printf("LCD ST7789V initialization.\n");
         lcd_init_cmds = st_init_cmds;
+    } else if (lcd_type == LCD_TYPE_OLED) {
+    	printf("LCD SSD1306 initialization.\n");
+    	lcd_init_cmds = oled_init_cmds;
     } else {
         printf("LCD ILI9341 initialization.\n");
         lcd_init_cmds = ili_init_cmds;
@@ -268,7 +311,34 @@ void lcd_init(spi_device_handle_t spi)
     gpio_set_level(PIN_NUM_BCKL, 0);
 }
 
+#if defined( CONFIG_LCD_TYPE_SSD1306 )
 
+static void oled_refresh_gram(spi_device_handle_t spi)
+{
+	int x;
+	for(x = 0; x < 8; x ++) {
+		lcd_cmd(spi, 0xb0 + x);
+		lcd_cmd(spi, 0x00);
+		lcd_cmd(spi, 0x10);
+		lcd_data(spi, (const uint8_t *)(OLED_GRAM[x]), 128);
+	}
+}
+
+static void oled_clear(spi_device_handle_t spi)
+{
+    memset((void *)OLED_GRAM, 0, 128 * 8);
+    oled_refresh_gram(spi);
+}
+
+static void oled_draw_test(spi_device_handle_t spi)
+{
+	int x;
+	for(x = 0; x < 128; x += 2)
+		OLED_GRAM[0][x] = 0xFF;
+	oled_refresh_gram(spi);
+}
+
+#else
 //To send a set of lines we have to send a command, 2 data bytes, another command, 2 more data bytes and another command
 //before sending the line data itself; a total of 6 transactions. (We can't put all of this in just one transaction
 //because the D/C line needs to be toggled in the middle.)
@@ -371,6 +441,7 @@ static void display_pretty_colors(spi_device_handle_t spi)
         }
     }
 }
+#endif
 
 void app_main()
 {
@@ -403,10 +474,19 @@ void app_main()
     ESP_ERROR_CHECK(ret);
     //Initialize the LCD
     lcd_init(spi);
+#if defined( CONFIG_LCD_TYPE_SSD1306 )
+    vTaskDelay(1000 / portTICK_RATE_MS);
+    printf("clear oled screen.\n");
+    oled_clear(spi);
+    vTaskDelay(1000 / portTICK_RATE_MS);
+    printf("draw gram test.\n");
+    oled_draw_test(spi);
+#else
     //Initialize the effect displayed
     ret=pretty_effect_init();
     ESP_ERROR_CHECK(ret);
 
     //Go do nice stuff.
     display_pretty_colors(spi);
+#endif
 }
