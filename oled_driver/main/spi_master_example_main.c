@@ -343,6 +343,11 @@ static void oled_setfont(const type_font_t *pFont)
 	current_font = (type_font_t *)pFont;
 }
 
+static type_font_t *oled_getfont(void)
+{
+	return current_font;
+}
+
 static void oled_drawchar(uint8_t x, uint8_t y, uint8_t c, uint8_t mode)
 {
 	uint8_t i, j;
@@ -520,7 +525,9 @@ void app_main()
     printf("draw any characters.\n");
     oled_drawchar(10, 10, 'K', 1);
     oled_drawchar(18, 10, 'Y', 0);
+    printf("set font to Font24x12.\n");
     oled_setfont(&Font24x12);
+    printf("current font size: Width: %d, Height: %d.\n", oled_getfont()->Width, oled_getfont()->Height);
     oled_drawchar(30, 10, 'A', 1);
     oled_setfont(&Font12x6);
     oled_drawchar(50, 10, 'S', 1);
