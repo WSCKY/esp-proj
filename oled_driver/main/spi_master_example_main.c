@@ -330,6 +330,12 @@ static void oled_clear(spi_device_handle_t spi)
     oled_refresh_gram(spi);
 }
 
+static void oled_drawpoint(uint8_t x, uint8_t y, uint8_t mode)
+{
+	if(x > 127 || y > 63) return;
+	if(mode) OLED_GRAM[7 - y / 8][x] |= 0x01 << (7 - (y % 8));
+}
+
 static void oled_draw_test(spi_device_handle_t spi)
 {
 	int x;
@@ -481,6 +487,9 @@ void app_main()
     vTaskDelay(1000 / portTICK_RATE_MS);
     printf("draw gram test.\n");
     oled_draw_test(spi);
+    printf("draw a point at col: 60, row: 33");
+    oled_drawpoint(60, 33, 1);
+    oled_refresh_gram(spi);
 #else
     //Initialize the effect displayed
     ret=pretty_effect_init();
