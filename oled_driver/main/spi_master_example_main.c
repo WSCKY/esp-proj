@@ -394,6 +394,33 @@ static void oled_drawHline(uint8_t x, uint8_t y, uint8_t length, uint8_t mode)
 	}
 }
 
+static void oled_drawVline(uint8_t x, uint8_t y, uint8_t length, uint8_t mode)
+{
+	uint8_t pos, msk, hmsk, shift, hbit;
+	hmsk = 0xFF;
+
+	while(length) {
+		msk = 0xFF;
+		pos = 7 - (y / 8);
+		shift = (y % 8);
+		hbit = 8 - shift;
+
+		if(length < hbit) { hbit -= length; y += length; length = 0; }
+		else { y += hbit; length -= hbit; hbit = 0; }
+
+		while(shift --) {
+			msk >>= 1;
+		}
+		while(hbit --) {
+			hmsk <<= 1;
+		}
+		msk &= hmsk;
+
+		if(mode) OLED_GRAM[pos][x] |= msk;
+		else OLED_GRAM[pos][x] &= ~msk;
+	}
+}
+
 static void oled_drawline(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t mode)
 {
 	int deltax = 0, deltay = 0, x = 0, y = 0, xinc1 = 0, xinc2 = 0,
@@ -605,16 +632,19 @@ void app_main()
     oled_drawchar(50, 10, 'S', 1);
     printf("Show string: Hello kyChu! \n");
     oled_drawstring(0, 35, "Hello kyChu!", 1);
-    oled_drawstring(37, 0, "Hello kyChu!-37", 1);
-    oled_drawstring(38, 12, "Hello kyChu!-38", 1);
-    oled_drawstring(0, 51, "Hello kyChu!-51", 1);
-    oled_drawstring(0, 52, "Hello kyChu!-52", 1);
+//    oled_drawstring(37, 0, "Hello kyChu!-37", 1);
+//    oled_drawstring(38, 12, "Hello kyChu!-38", 1);
+//    oled_drawstring(0, 51, "Hello kyChu!-51", 1);
+//    oled_drawstring(0, 52, "Hello kyChu!-52", 1);
     printf("draw line test.\n");
     oled_drawline(5, 5, 120, 60, 1);
     oled_drawline(5, 60, 120, 5, 1);
-    printf("draw horizontal line.\n")
+    printf("draw horizontal line.\n");
     oled_drawHline(32, 0, 64, 1);
     oled_drawHline(0, 1, 127, 1);
+    printf("draw vertical line.\n");
+    oled_drawVline(120, 20, 30, 1);
+    oled_drawVline(122, 20, 43, 1);
     oled_refresh_gram(spi);
 #else
     //Initialize the effect displayed
