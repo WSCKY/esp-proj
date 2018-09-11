@@ -1,0 +1,30 @@
+pin connection:
+  GND ----> 0.0V
+  VCC ----> 3.3V
+  CLK ----> SPI.SCLK
+  DIN ----> SPI.MOSI
+  RST ----> RESET
+  D/C ----> Data/Command Select
+
+Display Area:
+
+            |<-01234567->|
+            +------------+ -+-
+            |            |  |
+            |            |  0
+            |            |  .
+            |            |  .
+  (Bottom)  |   ----->   | (TOP)
+            |            |  .
+            |            |  .
+            |            | 127
+            |            |  |
+            +------------+ -+-
+
+bit combine:
+Dispaly RAM -> Sector <0..7>
+Sector: bit0 .. bit7 (left L, right H)
+
+
+
+
