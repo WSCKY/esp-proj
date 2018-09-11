@@ -399,7 +399,7 @@ static void oled_drawVline(uint8_t x, uint8_t y, uint8_t length, uint8_t mode)
 {
 	uint8_t pos, msk, hmsk, shift, hbit;
 	hmsk = 0xFF;
-	lenght ++;
+	length ++;
 	if((y + length) > 63) length = 63 - y;
 	while(length) {
 		msk = 0xFF;
@@ -421,6 +421,14 @@ static void oled_drawVline(uint8_t x, uint8_t y, uint8_t length, uint8_t mode)
 		if(mode) OLED_GRAM[pos][x] |= msk;
 		else OLED_GRAM[pos][x] &= ~msk;
 	}
+}
+
+static void oled_drawrect(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t mode)
+{
+	oled_drawVline(x1, y1, y2 - y1, mode);
+	oled_drawVline(x2, y1, y2 - y1, mode);
+	oled_drawHline(x1, y1, x2 - x1, mode);
+	oled_drawHline(x1, y2, x2 - x1, mode);
 }
 
 static void oled_drawline(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t mode)
@@ -647,6 +655,8 @@ void app_main()
     printf("draw vertical line.\n");
     oled_drawVline(120, 20, 30, 1);
     oled_drawVline(122, 20, 43, 1);
+    printf("draw a rectangle.\n");
+    oled_drawrect(70, 20, 118, 56, 1);
     oled_refresh_gram(spi);
 #else
     //Initialize the effect displayed
