@@ -387,6 +387,7 @@ static void oled_drawHline(uint8_t x, uint8_t y, uint8_t length, uint8_t mode)
 {
 	uint8_t msk = 0x1 << (7 - (y % 8));
 	uint8_t pos = 7 - (y / 8);
+	length ++;
 	while(length --) {
 		if(x >= 128) break;
 		if(mode) OLED_GRAM[pos][x ++] |= msk;
@@ -398,7 +399,7 @@ static void oled_drawVline(uint8_t x, uint8_t y, uint8_t length, uint8_t mode)
 {
 	uint8_t pos, msk, hmsk, shift, hbit;
 	hmsk = 0xFF;
-
+	lenght ++;
 	while(length) {
 		msk = 0xFF;
 		pos = 7 - (y / 8);
