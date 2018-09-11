@@ -334,7 +334,10 @@ static void oled_clear(spi_device_handle_t spi)
 static void oled_drawpoint(uint8_t x, uint8_t y, uint8_t mode)
 {
 	if(x > 127 || y > 63) return;
-	if(mode) OLED_GRAM[7 - y / 8][x] |= 0x01 << (7 - (y % 8));
+	uint8_t msk = 0x01 << (7 - (y % 8));
+	uint8_t pos = 7 - (y / 8);
+	if(mode) OLED_GRAM[pos][x] |= msk;
+	else OLED_GRAM[pos][x] &= ~msk;
 }
 
 static type_font_t* current_font = (type_font_t *)&Font16x8;
