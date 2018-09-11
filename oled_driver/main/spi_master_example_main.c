@@ -383,6 +383,17 @@ static void oled_drawstring(uint8_t x, uint8_t y, char *Text, uint8_t mode)
 	}
 }
 
+static void oled_drawHline(uint8_t x, uint8_t y, uint8_t length, uint8_t mode)
+{
+	uint8_t msk = 0x1 << (7 - (y % 8));
+	uint8_t pos = 7 - (y / 8);
+	while(length --) {
+		if(x >= 128) break;
+		if(mode) OLED_GRAM[pos][x ++] |= msk;
+		else OLED_GRAM[pos][x ++] &= ~msk;
+	}
+}
+
 static void oled_drawline(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t mode)
 {
 	int deltax = 0, deltay = 0, x = 0, y = 0, xinc1 = 0, xinc2 = 0,
@@ -601,6 +612,9 @@ void app_main()
     printf("draw line test.\n");
     oled_drawline(5, 5, 120, 60, 1);
     oled_drawline(5, 60, 120, 5, 1);
+    printf("draw horizontal line.\n")
+    oled_drawHline(32, 0, 64, 1);
+    oled_drawHline(0, 1, 127, 1);
     oled_refresh_gram(spi);
 #else
     //Initialize the effect displayed
