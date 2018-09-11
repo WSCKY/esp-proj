@@ -400,6 +400,7 @@ static void oled_drawVline(uint8_t x, uint8_t y, uint8_t length, uint8_t mode)
 	uint8_t pos, msk, hmsk, shift, hbit;
 	hmsk = 0xFF;
 	lenght ++;
+	if((y + length) > 63) length = 63 - y;
 	while(length) {
 		msk = 0xFF;
 		pos = 7 - (y / 8);
