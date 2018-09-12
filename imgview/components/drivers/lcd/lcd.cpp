@@ -344,28 +344,43 @@ void CMyLcd::scrollTo(uint16_t y)
 void CMyLcd::setRotation(uint8_t m)
 {
     uint8_t data = 0;
-    rotation = m % 4;  //Can't be more than 3
+    rotation = m % 7;  //Can't be more than 6
     switch (rotation) {
     case 0:
-        data = MADCTL_MX | MADCTL_BGR;
-        _width = m_width;
-        _height = m_height;
-        break;
+    	data = 0 | MADCTL_RGB; // Normal
+    	_width = m_width;
+    	_height = m_height;
+    	break;
     case 1:
-        data = MADCTL_MV | MADCTL_BGR;
-        _width = m_height;
-        _height = m_width;
-        break;
+		data = MADCTL_MV | MADCTL_MY | MADCTL_RGB; // X-Y Exchange && Y-Mirror
+		_width = m_height;
+		_height = m_width;
+		break;
     case 2:
-        data = MADCTL_MY | MADCTL_BGR;
-        _width = m_width;
-        _height = m_height;
-        break;
+    	data = MADCTL_MX | MADCTL_MY | MADCTL_RGB; // X-Mirror && Y-Mirror
+    	_width = m_width;
+    	_height = m_height;
+    	break;
     case 3:
-        data = MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR;
-        _width = m_height;
-        _height = m_width;
-        break;
+    	data = MADCTL_MV | MADCTL_MX | MADCTL_RGB; // X-Y Exchange && X-Mirror
+    	_width = m_height;
+    	_height = m_width;
+    	break;
+    case 4:
+    	data = MADCTL_MX | MADCTL_RGB; // X-Mirror
+		_width = m_width;
+		_height = m_height;
+		break;
+    case 5:
+    	data = MADCTL_MY | MADCTL_RGB; // Y-Mirror
+    	_width = m_width;
+    	_height = m_height;
+    	break;
+    case 6:
+    	data = MADCTL_MV | MADCTL_RGB; // X-Y Exchange
+    	_width = m_width;
+    	_height = m_height;
+    	break;
     }
     transmitCmdData(LCD_MADCTL, data, 1);
 }
