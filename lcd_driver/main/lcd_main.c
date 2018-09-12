@@ -39,6 +39,8 @@
 #define PIN_NUM_RST  5
 #define PIN_NUM_BCKL 2
 
+#define PIN_NUM_LED  CONFIG_LED_GPIO
+
 #define LCD_X_SIZE      128
 #define LCD_Y_SIZE      160
 
@@ -142,6 +144,20 @@ void lcd_init(spi_device_handle_t spi)
 
     ///Enable backlight
     gpio_set_level(PIN_NUM_BCKL, 0);
+}
+
+//Initialize the LED
+void led_init(gpio_num_t pin)
+{
+	/* Configure the IOMUX register for pad BLINK_GPIO (some pads are
+	   muxed to GPIO on reset already, but some default to other
+	   functions and need to be switched to GPIO. Consult the
+	   Technical Reference for a list of pads and their default
+	   functions.)
+	*/
+	gpio_pad_select_gpio(pin);
+	/* Set the GPIO as a push/pull output */
+	gpio_set_direction(pin, GPIO_MODE_OUTPUT);
 }
 
 //To send a set of lines we have to send a command, 2 data bytes, another command, 2 more data bytes and another command
@@ -275,10 +291,19 @@ void app_main()
     ESP_ERROR_CHECK(ret);
     //Initialize the LCD
     lcd_init(spi);
+    //Initialize the LED
+    led_init(PIN_NUM_LED);
     //Initialize the effect displayed
     ret=pretty_effect_init();
     ESP_ERROR_CHECK(ret);
 
     //Go do nice stuff.
     display_pretty_colors(spi);
+
+    while(1) {
+    	gpio_set_level(PIN_NUM_LED, 0);
+    	vTaskDelay(500 / portTICK_RATE_MS);
+    	gpio_set_level(PIN_NUM_LED, 1);
+    	vTaskDelay(500 / portTICK_RATE_MS);
+    }
 }
