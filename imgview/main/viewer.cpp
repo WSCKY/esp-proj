@@ -31,9 +31,28 @@ extern "C" void app_main()
   }
 
   /*screen initialize*/
-  lcd->invertDisplay(false);
-  lcd->setRotation(1);             //Landscape mode
+//  lcd->invertDisplay(false);
+//  lcd->setRotation(1);             //Landscape mode
   lcd->fillScreen(COLOR_ESP_BKGD);
+  lcd->drawString("Hello World!", 0, 0);
+  lcd->fillRect(0, 10, 60, 40, COLOR_BLUE);
+  lcd->fillRect(64, 10, 60, 40, COLOR_GREEN);
+  lcd->fillRect(0, 50, 60, 40, COLOR_RED);
 //  lcd->drawBitmap(0, 0, esp_logo, 137, 26);
 //  lcd->drawBitmap(243, 0, aws_logo, 77, 31);
+
+  lcd->setRotation(0);
+  lcd->drawString("Rotation-0", 0, 10);
+  lcd->setRotation(1);
+  lcd->drawString("Rotation-1", 0, 10);
+  lcd->setRotation(2);
+  lcd->drawString("Rotation-2", 0, 10);
+  lcd->setRotation(3);
+  lcd->drawString("Rotation-3", 0, 10);
+  lcd->setRotation(4);
+  lcd->drawString("Rotation-4", 0, 10);
+  lcd->setRotation(5);
+  lcd->drawString("Rotation-5", 0, 10);
+  lcd->setRotation(6);
+  lcd->drawString("Rotation-6", 0, 10);
 }
