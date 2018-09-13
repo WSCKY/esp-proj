@@ -55,6 +55,7 @@
 #define COLOR_PINK        0xF81F
 #define COLOR_SILVER      0xC618
 #define COLOR_GRAY        0x8410
+#define COLOR_BROWN       0xA145      /* 165, 42,   42 */
 #define COLOR_LIME        0x07E0
 #define COLOR_TEAL        0x0410
 #define COLOR_FUCHSIA     0xF81F
