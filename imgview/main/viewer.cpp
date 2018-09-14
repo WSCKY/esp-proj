@@ -59,7 +59,6 @@ uint16_t getColor(int code)
 		case 36: return COLOR_CYAN;
 		default: return COLOR_WHITE;
 	}
-
 }
 
 int getCode(const char *p)
@@ -142,13 +141,13 @@ void lcd_output(const char *pString)
 		}
 	}
 }
-
+#define LOG_CACHE_SIZE     80
 int lcd_log_vprintf(const char *fmt, va_list ap)
 {
-	int ret;
-	char buf[256];
+	int ret = 0;
+	char buf[LOG_CACHE_SIZE];
 	ret = vsprintf(buf, fmt, ap);
-	if(ret >= 256) buf[255] = 0;
+	if(ret >= LOG_CACHE_SIZE) buf[LOG_CACHE_SIZE - 1] = 0;
 	else buf[ret] = 0;
 	lcd_output(buf);
 	return ret;
@@ -180,9 +179,8 @@ extern "C" void app_main()
   /*screen initialize*/
   lcd->setRotation(3);             //Landscape mode
   lcd->fillScreen(lcd->color565(0x80, 0x80, 0x80));
-//  test_terminal("\e[0;32mGreen\e[0m Hello, kyChu!\e[31mRed Text\e[0m Long Long Long ...\n \033[34mHahahaha");
   esp_log_set_vprintf(lcd_log_vprintf);
-  ESP_LOGI(TAG, "Variables: %d.", 36);
+  ESP_LOGI(TAG, "Variables: %03d.", 36);
   ESP_LOGW(TAG, "Warning Info.");
   ESP_LOGE(TAG, "Error Info.");
   ESP_LOGD(TAG, "Debug Info.");
