@@ -12,6 +12,7 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "esp_log.h"
+#include "freertos/queue.h"
 #include "freertos/ringbuf.h"
 
 static const char *TAG = "rb_test";
@@ -20,6 +21,35 @@ static char tx_item[] = "kychu test item.";
 static char tx_item_1[] = "kychu test item - 1."; /* 20 Bytes. */
 static char tx_item_2[] = "kychu test item - 2.";
 static char tx_item_3[] = "kychu test item - 3.";
+
+RingbufHandle_t b_handle[3];
+static void queue_set_receiving_task(void *queue_set_handle)
+{
+	QueueSetHandle_t queue_set = (QueueSetHandle_t)queue_set_handle;
+
+	while(1) {
+		//Receive multiple items via queue set
+		xQueueSetMemberHandle member = xQueueSelectFromSet(queue_set, pdMS_TO_TICKS(1000));
+		for(int i = 0; i < 3; i ++) {
+			//Check if member is ring buffer
+			if (member != NULL && xRingbufferCanRead(b_handle[i], member) == pdTRUE) {
+				//Member is ring buffer, receive item from ring buffer
+				size_t item_size;
+				char *item = (char *)xRingbufferReceive(b_handle[i], &item_size, 0);
+
+				//Handle item
+				printf("buf %d rec: ", i);
+				for(int x = 0; x < item_size; x ++) printf("%c", item[x]);
+				printf("\n");
+				//Return Item
+				vRingbufferReturnItem(b_handle[i], (void *)item);
+			} else {
+
+			}
+		}
+	}
+	vTaskDelete(NULL);
+}
 
 void app_main(void)
 {
@@ -142,4 +172,28 @@ void app_main(void)
 	}
 	ESP_LOGI(TAG, "Max Item Size: %d.", xRingbufferGetMaxItemSize(buf_handle));
 	ESP_LOGI(TAG, "Current Free Size: %d.", xRingbufferGetCurFreeSize(buf_handle));
+	vRingbufferDelete(buf_handle);
+
+	ESP_LOGI(TAG, "ring buffer test, Ring Buffers with Queue Sets");
+	for(int i = 0; i < 3; i ++) {
+		b_handle[i] = xRingbufferCreate(80, RINGBUF_TYPE_NOSPLIT);
+		if(b_handle[i] == NULL) {
+			ESP_LOGE(TAG, "Failed to create ring buffer.");
+		}
+	}
+	ESP_LOGI(TAG, "buffers create complete.");
+	QueueSetHandle_t queue_set = xQueueCreateSet(4);
+	for(int i = 0; i < 3; i ++) {
+		if(xRingbufferAddToQueueSetRead(b_handle[i], queue_set) != pdTRUE) {
+			ESP_LOGE(TAG, "Failed to add queue set, idx: %d.", i);
+		}
+	}
+	ESP_LOGI(TAG, "Add to queue set ok.");
+	xTaskCreate(&queue_set_receiving_task, "buf_handler", 2048, (void *)queue_set, 5, NULL); /* need a large stack, 2048 */
+	ESP_LOGI(TAG, "add item to buffer.");
+	for(int i = 0; i < 5; i ++) {
+		for(int j = 0; j < 3; j ++) {
+			xRingbufferSend(b_handle[j], tx_item_1, sizeof(tx_item_1), pdMS_TO_TICKS(1000));
+		}
+	}
 }
