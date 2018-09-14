@@ -17,6 +17,9 @@
 static const char *TAG = "rb_test";
 
 static char tx_item[] = "kychu test item.";
+static char tx_item_1[] = "kychu test item - 1.";
+static char tx_item_2[] = "kychu test item - 2.";
+static char tx_item_3[] = "kychu test item - 3.";
 
 void app_main(void)
 {
@@ -47,6 +50,48 @@ void app_main(void)
 		printf("\n");
 		//Return Item
 		vRingbufferReturnItem(buf_handle, (void *)item);
+	} else {
+		//Failed to receive item
+		ESP_LOGE(TAG, "Failed to receive item.");
+	}
+	vRingbufferDelete(buf_handle);
+
+	buf_handle = xRingbufferCreate(80, RINGBUF_TYPE_ALLOWSPLIT); /* 80 bytes. */
+	if(buf_handle == NULL) {
+		ESP_LOGE(TAG, "Failed to create ring buffer.");
+	}
+	res = xRingbufferSend(buf_handle, tx_item_1, sizeof(tx_item_1), pdMS_TO_TICKS(1000));
+	if(res != pdTRUE) {
+		ESP_LOGE(TAG, "Failed to send item 1.");
+	}
+	res = xRingbufferSend(buf_handle, tx_item_2, sizeof(tx_item_2), pdMS_TO_TICKS(1000));
+	if(res != pdTRUE) {
+		ESP_LOGE(TAG, "Failed to send item 2.");
+	}
+	res = xRingbufferSend(buf_handle, tx_item_3, sizeof(tx_item_3), pdMS_TO_TICKS(1000)); /* no enough space. */
+	if(res != pdTRUE) {
+		ESP_LOGE(TAG, "Failed to send item 3.");
+	}
+
+	//Receive an item from allow-split ring buffer
+	size_t item_size1, item_size2;
+	char *item1, *item2;
+	BaseType_t ret = xRingbufferReceiveSplit(buf_handle, (void **)&item1, (void **)&item2, &item_size1, &item_size2, pdMS_TO_TICKS(1000));
+
+	//Check received item
+	if (ret == pdTRUE && item1 != NULL) {
+		for (int i = 0; i < item_size1; i++) {
+			printf("%c", item1[i]);
+		}
+		vRingbufferReturnItem(buf_handle, (void *)item1);
+		//Check if item was split
+		if (item2 != NULL) {
+			for (int i = 0; i < item_size2; i++) {
+				printf("%c", item2[i]);
+			}
+			vRingbufferReturnItem(buf_handle, (void *)item2);
+		}
+		printf("\n");
 	} else {
 		//Failed to receive item
 		ESP_LOGE(TAG, "Failed to receive item.");
