@@ -157,6 +157,7 @@ int lcd_log_vprintf(const char *fmt, va_list ap)
 
 extern "C" void app_main()
 {
+	char buf[30] = {0};
   printf("Image Viewer.\n");
   lcd_conf_t lcd_pins = {
 	  .pin_num_miso = GPIO_NUM_25,
@@ -198,10 +199,21 @@ extern "C" void app_main()
   lcd->setRotation(3);             //Landscape mode
   lcd->fillScreen(lcd->color565(0x80, 0x80, 0x80));
   esp_log_set_vprintf(lcd_log_vprintf);
-  ESP_LOGI(TAG, "Variables: %03d.", 36);
-  ESP_LOGW(TAG, "Warning Info.");
-  ESP_LOGE(TAG, "Error Info.");
-  ESP_LOGD(TAG, "Debug Info.");
+
+  ESP_LOGI(TAG, "open kychu.txt");
+  FILE *f = fopen("/sdcard/kychu.txt", "wt+");
+  if(f == NULL) {
+	  ESP_LOGE(TAG, "Failed to open file for writing");
+  } else {
+	  ESP_LOGI(TAG, "write any data.");
+	  fwrite("Hello kyChu! @2018/9/17.\n", 26, 1, f);
+	  ESP_LOGI(TAG, "set file pointer to 0.");
+	  fseek(f, 0, SEEK_SET);
+	  fread(buf, 26, 1, f);
+	  ESP_LOGI(TAG, "Read back: %s", buf);
+	  ESP_LOGI(TAG, "close file.");
+	  fclose(f);
+  }
   esp_log_set_vprintf(vprintf);
   ESP_LOGI(TAG, "log show on console.");
 }
