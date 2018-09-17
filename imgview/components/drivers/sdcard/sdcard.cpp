@@ -23,6 +23,8 @@ SDCard::SDCard(sdcard_conf_t *sd_conf)
     	slot_config.gpio_cd   = (gpio_num_t)sd_conf->pin_num_cd;
     if(sd_conf->pin_num_wp != SDCARD_CONFIG_DEFAULT_VAL)
     	slot_config.gpio_wp   = (gpio_num_t)sd_conf->pin_num_wp;
+    if(sd_conf->dma_channel >= 1 && sd_conf->dma_channel <= 2)
+    	slot_config.dma_channel = sd_conf->dma_channel;
 
     // Options for mounting the filesystem.
     // If format_if_mount_failed is set to true, SD card will be partitioned and

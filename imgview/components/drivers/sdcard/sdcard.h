@@ -25,6 +25,7 @@ typedef struct {
     int8_t pin_num_cd;           /*!<Pin to card detect Pin*/
     int8_t pin_num_wp;           /*!<Pin to write protect Pin*/
     spi_host_device_t spi_host;  /*!< spi host index*/
+    int dma_channel;             /*!< DMA channel to be used by SPI driver (1 or 2)*/
     const char* base_path;
 } sdcard_conf_t;
 
