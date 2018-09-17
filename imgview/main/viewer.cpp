@@ -7,8 +7,10 @@
 #include "esp_system.h"
 
 #include "lcd.h"
+#include "sdcard.h"
 
 CMyLcd *lcd = NULL;
+SDCard *card = NULL;
 
 static const char *TAG = "Viewer";
 
@@ -167,13 +169,29 @@ extern "C" void app_main()
 	  .clk_freq = 26 * 1000 * 1000,
 	  .rst_active_level = 0,
 	  .bckl_active_level = 0,
-	  .spi_host = HSPI_HOST,
+	  .spi_host = VSPI_HOST,
 	  .init_spi_bus = true,
+  };
+
+  sdcard_conf_t sd_conf = {
+	.pin_num_miso = GPIO_NUM_12,
+    .pin_num_mosi = GPIO_NUM_15,
+    .pin_num_clk = GPIO_NUM_14,
+    .pin_num_cs = GPIO_NUM_13,
+    .pin_num_cd = SDCARD_CONFIG_DEFAULT_VAL,
+    .pin_num_wp = SDCARD_CONFIG_DEFAULT_VAL,
+    .spi_host = HSPI_HOST,
+	.dma_channel = 2,
+    .base_path = "/sdcard",
   };
 
   /*Initialize SPI Handler*/
   if (lcd == NULL) {
 	  lcd = new CMyLcd(&lcd_pins);
+  }
+
+  if(card == NULL) {
+	  card = new SDCard(&sd_conf);
   }
 
   /*screen initialize*/
