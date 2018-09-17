@@ -9,6 +9,11 @@
 #include "esp_partition.h"
 #include "freertos/semphr.h"
 
+#include "esp_vfs_fat.h"
+#include "driver/sdmmc_host.h"
+#include "driver/sdspi_host.h"
+#include "sdmmc_cmd.h"
+
 /**
  * @brief struct to map GPIO to sdcard pins
  */
@@ -25,17 +30,20 @@ typedef struct {
 
 #define SDCARD_CONFIG_DEFAULT_VAL      (-1)
 
+#ifdef __cplusplus
+
 class SDCard {
 private:
-	sdmmc_host_t host = NULL;
-	sdspi_slot_config_t slot_config = NULL;
-	esp_vfs_fat_sdmmc_mount_config_t mount_config = NULL;
+	sdmmc_host_t host;
+	sdspi_slot_config_t slot_config;
+	esp_vfs_fat_sdmmc_mount_config_t mount_config;
 	sdmmc_card_t* card;
 	SemaphoreHandle_t sdcard_mux;
 public:
 	SDCard(sdcard_conf_t *sd_conf);
 	virtual ~SDCard();
-	void print_card_info(FILE* stream);
-}
+};
+
+#endif /* __cplusplus */
 
 #endif /* __SDCARD_H */
