@@ -9,9 +9,11 @@
 
 #include "lcd.h"
 #include "sdcard.h"
+#include "imgDecoder.h"
 
 CMyLcd *lcd = NULL;
 SDCard *card = NULL;
+imgDecoder *decoder = NULL;
 
 static const char *TAG = "Viewer";
 
@@ -156,6 +158,11 @@ int lcd_log_vprintf(const char *fmt, va_list ap)
 	return ret;
 }
 
+void drawBitmap(int16_t x, int16_t y, const uint16_t *bitmap, int16_t w, int16_t h)
+{
+	lcd->drawBitmap(x, y, bitmap, w, h);
+}
+
 extern "C" void app_main()
 {
 //	char buf[30] = {0};
@@ -226,4 +233,10 @@ extern "C" void app_main()
 	  printf("%s\n", dc->d_name);
   }
   closedir(dir);
+
+  lcd->setRotation(0);
+  if(decoder == NULL) {
+    decoder = new imgDecoder("/sdcard/bmp/img1.bmp", drawBitmap);
+  }
+  decoder->decodeBMP();
 }
