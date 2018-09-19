@@ -3,175 +3,127 @@
 #include "esp_log.h"
 #include "esp_heap_caps.h"
 
+#define RGB_2_BYTES(a, b)      (((uint16_t)(a) << 8) | (b))
+#define RGB555_2_BYTES(a, b)   (((uint16_t)(a) << 9) | (((uint16_t)(b) & 0xE0) << 1 ) | ((b) & 0x1F))
+#define RGB_3_BYTES(a, b, c)   ((((uint16_t)(a) << 8) & 0xF800) | (((uint16_t)(b) << 3) & 0x07E0) | ((c) >> 3))
+
 static const char *TAG = "BMP_DEC";
 
 uint16_t ImgWidth = 0, ImgHeight = 0;
 
-#define PARALLEL_LINES         1
+#define PARALLEL_LINES         8
 
-void bmp_decode(const char *path, pDrawBitmap_t pDrawBitmap)
+void bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen)
 {
-//	FIL* f_bmp;
-//    uint16_t br;
-
-    uint16_t count;
-	uint8_t  rgb, color_byte;
-	uint16_t x, y, color;
-	uint16_t countpix = 0;
-
-//	uint16_t realx = 0;
-//	uint16_t realy = 0;
-//	uint8_t  yok = 1;
-//	uint8_t res;
+    uint16_t cnt = 0;
+	uint8_t color_byte;
+	uint16_t color = 0;
+	uint16_t pixel_cnt = 0;
 
 	uint8_t *databuf = NULL;
-	uint16_t readlen = BMP_DBUF_SIZE;
-	uint16_t *lines = NULL;
+	uint16_t readlen = 0;
+	uint16_t line_cnt = 0;
+	uint16_t *line_data = NULL;
 
-//	uint8_t *bmpbuf;
+	uint16_t data_offset = 0;
 	uint8_t biCompression = 0;
 
-	uint16_t rowlen;
-//	BITMAPINFO *pbmp;
+	uint8_t extra = 0;
+	uint16_t line_bytes = 0;
 
-	databuf = (uint8_t *)heap_caps_malloc(readlen, MALLOC_CAP_DMA);
+	databuf = (uint8_t *)calloc(1, sizeof(BITMAPINFO));
 	assert(databuf != NULL);
 
-//	f_bmp=(FIL *)pic_memalloc(sizeof(FIL));
-//	if(f_bmp==NULL)
-//	{
-//		pic_memfree(databuf);
-//		return PIC_MEM_ERR;
-//	}
 	FILE *f = fopen(path, "r"); // read only.
 	if(f == NULL) {
 		ESP_LOGE(TAG, "can't open file %s", path);
 	} else {
-//	res = f_open(f_bmp, (const TCHAR *)filename, FA_READ);
-//	if(res == 0) {
-		readlen = fread(databuf, readlen, 1, f);
-//		f_read(f_bmp, databuf, readlen, (UINT *)&br);
-		BITMAPINFO *pbmp = (BITMAPINFO *)databuf;
-		count = pbmp->bmfHeader.bfOffBits;
-		color_byte = pbmp->bmiHeader.biBitCount >> 3;
-		biCompression = pbmp->bmiHeader.biCompression;
-		ImgHeight = pbmp->bmiHeader.biHeight;
-		ImgWidth = pbmp->bmiHeader.biWidth;
-//		ai_draw_init();
+		readlen = fread(databuf, sizeof(BITMAPINFO), 1, f);
+		if(readlen > 0) {
+			BITMAPINFO *pbmp = (BITMAPINFO *)databuf;
+			// Copy data.
+			data_offset = pbmp->bmfHeader.bfOffBits;
+			color_byte = pbmp->bmiHeader.biBitCount >> 3;
+			biCompression = pbmp->bmiHeader.biCompression;
+			ImgHeight = pbmp->bmiHeader.biHeight;
+			ImgWidth = pbmp->bmiHeader.biWidth;
+			ESP_LOGI(TAG, "BMP, %dx%d, %dbit", (int)(pbmp->bmiHeader.biWidth), (int)(pbmp->bmiHeader.biHeight), (int)(pbmp->bmiHeader.biBitCount));
 
-		if((ImgWidth * color_byte) % 4)
-			rowlen = ((ImgWidth * color_byte) / 4 + 1) * 4;
-		else
-			rowlen = ImgWidth * color_byte;
-
-		lines = (uint16_t *)heap_caps_malloc(ImgWidth * sizeof(uint16_t) * PARALLEL_LINES, MALLOC_CAP_DMA);
-		assert(lines != NULL);
-
-		color = 0;
-		x = 0;
-		y = 0;
-		y = ImgHeight;
-		rgb = 0;
-
-//		realy = (y * picinfo.Div_Fac) >> 13;
-//		bmpbuf = databuf;
-		while(1) {
-			while(count < readlen) {
-				if(color_byte == 3) {
-					switch (rgb) {
-						case 0:
-							color = databuf[count] >> 3;
-							break;
-						case 1: 	 
-							color += ((uint16_t)databuf[count] << 3) & 0X07E0;
-							break;
-						case 2:
-							color += ((uint16_t)databuf[count] << 8) & 0XF800;
-							break;
-					}
-				} else if(color_byte == 2) {
-					switch(rgb) {
-						case 0:
-							if(biCompression==BI_RGB) {//RGB:5,5,5
-								color=((uint16_t)databuf[count]&0X1F);	 	//R
-								color+=(((uint16_t)databuf[count])&0XE0)<<1; //G
-							} else {//RGB:5,6,5
-								color = databuf[count];                      //G,B
-							}  
-							break;
-						case 1:
-							if(biCompression == BI_RGB) {//RGB:5,5,5
-								color += (uint16_t)databuf[count] << 9;  //R,G
-							} else {                                    //RGB:5,6,5
-								color += (uint16_t)databuf[count] << 8;	//R,G
-							}
-							break;
-					}
-				} else if(color_byte == 4) {
-					switch (rgb) {
-						case 0:				  
-							color = databuf[count] >> 3; //B
-							break;
-						case 1: 	 
-							color += ((uint16_t)databuf[count] << 3) & 0X07E0;//G
-							break;	  
-						case 2:
-							color += ((uint16_t)databuf[count] << 8) & 0XF800;//R
-							break;
-						case 3:
-							break;
-					}
-				} else if(color_byte == 1) {}
-
-				rgb ++;
-				count ++;
-				if(rgb == color_byte) {
-					if(x < ImgWidth) {
-						lines[x] = color;// + y * ImgWidth
-//						realx = (x*picinfo.Div_Fac)>>13;
-//						if(is_element_ok(realx,realy,1)&&yok)
-//						{
-//							pic_phy.draw_point(realx+picinfo.S_XOFF,realy+picinfo.S_YOFF-1,color);
-//						}
-					}
-					x ++;
-					color = 0x00;
-					rgb = 0;
-				}
-				countpix ++;
-				if(countpix >= rowlen)
-				{
-//					y --;
-//					if(y == 0) break;
-//					realy=(y*picinfo.Div_Fac)>>13;
-//					if(is_element_ok(realx,realy,0))yok=1;
-//					else yok=0;
-//					if((realy+picinfo.S_YOFF)==0)break;
-					x = 0;
-					countpix = 0;
-					color = 0x00;
-					rgb = 0;
-//					if(y == PARALLEL_LINES) {
-						// draw it.
-						pDrawBitmap(x, y --, lines, ImgWidth, 1);
-//					}
-				}	 
+			if(color_byte < 2 || color_byte > 4 ) {
+				ESP_LOGE(TAG, "unsupport %dbit color", (int)(pbmp->bmiHeader.biBitCount));
+				fclose(f);
+				goto exit;
 			}
-			readlen = fread(databuf, readlen, 1, f);
-//			res=f_read(f_bmp,databuf,readlen,(UINT *)&br);
-//			if(br!=readlen)readlen=br;
-//			if(res||br==0)break;
-//			bmpbuf = databuf;
-			if(readlen == 0) break;
-	 	 	count = 0;
+			free(databuf);
+
+			if((ImgWidth * color_byte) % 4)
+				line_bytes = ((ImgWidth * color_byte) / 4 + 1) * 4;
+			else
+				line_bytes = ImgWidth * color_byte;
+			extra = line_bytes - ImgWidth * color_byte;
+
+			if(pDrawPrepare(ImgWidth, ImgHeight) != ESP_OK) {
+				ESP_LOGE(TAG, "BMP Size unsupport.");
+				fclose(f);
+				goto exit;
+			}
+
+			fseek(f, data_offset, SEEK_SET);
+
+			databuf = (uint8_t *)malloc(line_bytes * PARALLEL_LINES);
+			line_data = (uint16_t *)heap_caps_malloc(ImgWidth * sizeof(uint16_t) * PARALLEL_LINES, MALLOC_CAP_DMA);
+			assert(line_data != NULL);
+
+			while((readlen = fread(databuf, sizeof(uint8_t), line_bytes * PARALLEL_LINES, f)) > 0) {
+				cnt = 0;
+				while(cnt < readlen) {
+					switch(color_byte) {
+					case 1:
+						//unsupport.
+						break;
+					case 2:
+						if(biCompression == BI_RGB) {
+							color = RGB555_2_BYTES(databuf[cnt + 1], databuf[cnt]);
+						} else {
+							color = RGB_2_BYTES(databuf[cnt + 1], databuf[cnt]);
+						}
+						break;
+					case 3:
+						color = RGB_3_BYTES(databuf[cnt + 2], databuf[cnt + 1], databuf[cnt]);
+						break;
+					case 4:
+						color = RGB_3_BYTES(databuf[cnt + 2], databuf[cnt + 1], databuf[cnt]);
+						// ... and ignore the databuf[cnt + 3].
+						break;
+					default:
+						//unsupport.
+						break;
+					}
+					cnt += color_byte;
+					line_data[pixel_cnt + line_cnt * ImgWidth] = color;
+					if( ++pixel_cnt >= ImgWidth) {
+						cnt += extra;
+						pixel_cnt = 0;
+						line_cnt ++;
+						if(line_cnt >= PARALLEL_LINES) {
+							pFillScreen(line_data, line_cnt);
+							line_cnt = 0;
+						}
+					}
+				}
+			}
+			if(line_cnt > 0)
+				pFillScreen(line_data, line_cnt);
+			fclose(f);
+		} else {
+			ESP_LOGE(TAG, "can't read data from %s", path);
+			fclose(f);
 		}
-		fclose(f);
 	}
 
-	heap_caps_free(lines);
-	heap_caps_free(databuf);
-
-//	return res;
+exit:
+	free(databuf);
+	heap_caps_free(line_data);
 }		 
 
 //uint8_t minibmp_decode(uint8_t *filename,uint16_t x,uint16_t y,uint16_t width,uint16_t height,uint16_t acolor,uint8_t mode)
