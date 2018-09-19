@@ -3,16 +3,18 @@
 
 #include "string.h"
 #include "stdio.h"
+#include "esp_err.h"
 #include "esp_system.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef void(*pDrawBitmap_t)(int16_t x, int16_t y, const uint16_t *bitmap, int16_t w, int16_t h);
+typedef esp_err_t (*pDrawPrepare_t)(int16_t w, int16_t h);
+typedef void (*pFillScreen_t)(const uint16_t *data, int16_t lines);
 
 //#define BMP_USE_MALLOC		1
-#define BMP_DBUF_SIZE		2048
+//#define BMP_DBUF_SIZE		2048
 
 typedef struct {
     uint32_t biSize;
@@ -57,7 +59,7 @@ typedef RGBQUAD * LPRGBQUAD; // color table
 #define BI_BITFIELDS 	3
 
 // Export functions.
-void bmp_decode(const char *path, pDrawBitmap_t pDrawBitmap);
+void bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen);
 //uint8_t minibmp_decode(uint8_t *filename,uint16_t x,uint16_t y,uint16_t width,uint16_t height,uint16_t acolor,uint8_t mode);
 //uint8_t bmp_encode(uint8_t *filename,uint16_t x,uint16_t y,uint16_t width,uint16_t height,uint8_t mode);
 
