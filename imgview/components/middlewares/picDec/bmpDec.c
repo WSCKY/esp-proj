@@ -13,8 +13,9 @@ uint16_t ImgWidth = 0, ImgHeight = 0;
 
 #define PARALLEL_LINES         8
 
-void bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen)
+esp_err_t bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen)
 {
+	esp_err_t ret = ESP_OK;
     uint16_t cnt = 0;
 	uint8_t color_byte;
 	uint16_t color = 0;
@@ -37,6 +38,7 @@ void bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFi
 	FILE *f = fopen(path, "r"); // read only.
 	if(f == NULL) {
 		ESP_LOGE(TAG, "can't open file %s", path);
+		ret = ESP_FAIL;
 	} else {
 		readlen = fread(databuf, sizeof(BITMAPINFO), 1, f);
 		if(readlen > 0) {
@@ -52,6 +54,7 @@ void bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFi
 			if(color_byte < 2 || color_byte > 4 ) {
 				ESP_LOGE(TAG, "unsupport %dbit color", (int)(pbmp->bmiHeader.biBitCount));
 				fclose(f);
+				ret = ESP_FAIL;
 				goto exit;
 			}
 			free(databuf);
@@ -66,6 +69,7 @@ void bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFi
 			if(pDrawPrepare(ImgWidth, ImgHeight) != ESP_OK) {
 				ESP_LOGE(TAG, "BMP Size unsupport.");
 				fclose(f);
+				ret = ESP_FAIL;
 				goto exit;
 			}
 
@@ -119,12 +123,14 @@ void bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFi
 		} else {
 			ESP_LOGE(TAG, "can't read data from %s", path);
 			fclose(f);
+			ret = ESP_FAIL;
 		}
 	}
 
 exit:
 	if(databuf != NULL) free(databuf);
 	heap_caps_free(line_data);
+	return ret;
 }		 
 
 //uint8_t minibmp_decode(uint8_t *filename,uint16_t x,uint16_t y,uint16_t width,uint16_t height,uint16_t acolor,uint8_t mode)

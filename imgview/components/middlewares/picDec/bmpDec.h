@@ -59,7 +59,7 @@ typedef RGBQUAD * LPRGBQUAD; // color table
 #define BI_BITFIELDS 	3
 
 // Export functions.
-void bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen);
+esp_err_t bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen);
 //uint8_t minibmp_decode(uint8_t *filename,uint16_t x,uint16_t y,uint16_t width,uint16_t height,uint16_t acolor,uint8_t mode);
 //uint8_t bmp_encode(uint8_t *filename,uint16_t x,uint16_t y,uint16_t width,uint16_t height,uint8_t mode);
 
