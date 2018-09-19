@@ -158,9 +158,20 @@ int lcd_log_vprintf(const char *fmt, va_list ap)
 	return ret;
 }
 
-void drawBitmap(int16_t x, int16_t y, const uint16_t *bitmap, int16_t w, int16_t h)
+uint16_t width = 0;
+esp_err_t setDrawAddr(int16_t w, int16_t h)
 {
-	lcd->drawBitmap(x, y, bitmap, w, h);
+	lcd->setRotation(0);
+	if(w > lcd->width()) return ESP_FAIL;
+	if(h > lcd->height()) return ESP_FAIL;
+	width = w;
+	lcd->setAddrWindow(0, 0, w - 1, h - 1);
+	return ESP_OK;
+}
+
+void fillData(const uint16_t *data, int16_t lines)
+{
+	lcd->fillDataFast(data, lines * width);
 }
 
 extern "C" void app_main()
@@ -234,9 +245,15 @@ extern "C" void app_main()
   }
   closedir(dir);
 
-  lcd->setRotation(0);
   if(decoder == NULL) {
-    decoder = new imgDecoder("/sdcard/bmp/img1.bmp", drawBitmap);
+    decoder = new imgDecoder("/sdcard/bmp/img2.bmp", setDrawAddr, fillData);
   }
-  decoder->decodeBMP();
+  while(1) {
+	  decoder->decodeBMP("/sdcard/bmp/img1.bmp");
+	  vTaskDelay(2000 / portTICK_RATE_MS);
+	  decoder->decodeBMP("/sdcard/bmp/img2.bmp");
+	  vTaskDelay(2000 / portTICK_RATE_MS);
+	  decoder->decodeBMP("/sdcard/bmp/img3.bmp");
+	  vTaskDelay(2000 / portTICK_RATE_MS);
+  }
 }
