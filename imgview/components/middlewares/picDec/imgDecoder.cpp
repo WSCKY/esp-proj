@@ -15,8 +15,8 @@ imgDecoder::~imgDecoder()
 
 }
 
-void imgDecoder::decodeBMP(const char *file)
+esp_err_t imgDecoder::decodeBMP(const char *file)
 {
 	if(file != NULL) path = file;
-	bmp_decode(path, pDrawInit, pFillData);
+	return bmp_decode(path, pDrawInit, pFillData);
 }

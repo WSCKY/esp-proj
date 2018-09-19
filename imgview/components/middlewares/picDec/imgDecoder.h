@@ -17,7 +17,7 @@ private:
 public:
 	imgDecoder(const char *file, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen);
 	virtual ~imgDecoder();
-	void decodeBMP(const char *file);
+	esp_err_t decodeBMP(const char *file);
 };
 
 #endif /* __cplusplus */
