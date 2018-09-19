@@ -17,6 +17,9 @@ imgDecoder *decoder = NULL;
 
 static const char *TAG = "Viewer";
 
+#define SDCARD_PATH      "/sdcard"
+#define BMP_PATH         "/bmp"
+
 /*
 
 #define LOG_COLOR_BLACK   "30"
@@ -161,7 +164,7 @@ int lcd_log_vprintf(const char *fmt, va_list ap)
 uint16_t width = 0;
 esp_err_t setDrawAddr(int16_t w, int16_t h)
 {
-	lcd->setRotation(0);
+	lcd->setRotation(4);
 	if(w > lcd->width()) return ESP_FAIL;
 	if(h > lcd->height()) return ESP_FAIL;
 	width = w;
@@ -172,6 +175,33 @@ esp_err_t setDrawAddr(int16_t w, int16_t h)
 void fillData(const uint16_t *data, int16_t lines)
 {
 	lcd->fillDataFast(data, lines * width);
+}
+
+char *fullname = NULL;
+char *getname(const char *a, const char *b)
+{
+	int i = 0;
+	if(fullname == NULL)
+		fullname = (char *)calloc(80, sizeof(char));
+	while(*a != 0)
+		fullname[i ++] = *a ++;
+	while(*b != 0)
+		fullname[i ++] = *b ++;
+	fullname[i] = 0;
+	return fullname;
+}
+
+bool checkBMP(const char *name)
+{
+	while(*name != '.' && *name != '\0')
+		name ++;
+	if(*name == '.') {
+		name ++;
+		if((*name == 'B' && *(name + 1) == 'M' && *(name + 2) == 'P') ||
+		   (*name == 'b' && *(name + 1) == 'm' && *(name + 2) == 'p'))
+			return true;
+	}
+	return false;
 }
 
 extern "C" void app_main()
@@ -202,7 +232,7 @@ extern "C" void app_main()
     .pin_num_wp = SDCARD_CONFIG_DEFAULT_VAL,
     .spi_host = HSPI_HOST,
 	.dma_channel = 2,
-    .base_path = "/sdcard",
+    .base_path = SDCARD_PATH,
   };
 
   /*Initialize SPI Handler*/
@@ -218,42 +248,29 @@ extern "C" void app_main()
   lcd->setRotation(3);             //Landscape mode
   lcd->fillScreen(lcd->color565(0x80, 0x80, 0x80));
   esp_log_set_vprintf(lcd_log_vprintf);
+  ESP_LOGI(TAG, "Image Viewer Start.");
 
-  ESP_LOGI(TAG, "SD Card Reader.");
-//  ESP_LOGI(TAG, "open kychu.txt");
-//  FILE *f = fopen("/sdcard/kychu.txt", "wt+");
-//  if(f == NULL) {
-//	  ESP_LOGE(TAG, "Failed to open file for writing");
-//  } else {
-//	  ESP_LOGI(TAG, "write any data.");
-//	  fwrite("Hello kyChu! @2018/9/17.\n", 26, 1, f);
-//	  ESP_LOGI(TAG, "set file pointer to 0.");
-//	  fseek(f, 0, SEEK_SET);
-//	  fread(buf, 26, 1, f);
-//	  ESP_LOGI(TAG, "Read back: %s", buf);
-//	  ESP_LOGI(TAG, "close file.");
-//	  fclose(f);
-//  }
   esp_log_set_vprintf(vprintf);
-  ESP_LOGI(TAG, "list dir /sdcard/jpg");
+  ESP_LOGI(TAG, "Image Viewer Start.");
 
   DIR *dir;
   struct dirent *dc;
-  dir = opendir("/sdcard/jpg");
-  while((dc =readdir(dir)) != NULL) {
-	  printf("%s\n", dc->d_name);
-  }
-  closedir(dir);
 
   if(decoder == NULL) {
     decoder = new imgDecoder("/sdcard/bmp/img2.bmp", setDrawAddr, fillData);
   }
   while(1) {
-	  decoder->decodeBMP("/sdcard/bmp/img1.bmp");
-	  vTaskDelay(2000 / portTICK_RATE_MS);
-	  decoder->decodeBMP("/sdcard/bmp/img2.bmp");
-	  vTaskDelay(2000 / portTICK_RATE_MS);
-	  decoder->decodeBMP("/sdcard/bmp/img3.bmp");
+	  dir = opendir(SDCARD_PATH BMP_PATH);
+	  while((dc = readdir(dir)) != NULL) {
+		  if(dc->d_type == 1 && checkBMP(dc->d_name)) {
+			  lcd->fillScreen(lcd->color565(0x80, 0x80, 0x80));
+			  decoder->decodeBMP((const char *)getname(SDCARD_PATH BMP_PATH "/", dc->d_name));
+			  lcd->setRotation(2);
+			  lcd->drawString(dc->d_name, 0, 0);
+			  vTaskDelay(2000 / portTICK_RATE_MS);
+		  }
+	  }
+	  closedir(dir);
 	  vTaskDelay(2000 / portTICK_RATE_MS);
   }
 }
