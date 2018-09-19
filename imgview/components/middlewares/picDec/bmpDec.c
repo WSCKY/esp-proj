@@ -55,6 +55,7 @@ void bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFi
 				goto exit;
 			}
 			free(databuf);
+			databuf = NULL;
 
 			if((ImgWidth * color_byte) % 4)
 				line_bytes = ((ImgWidth * color_byte) / 4 + 1) * 4;
@@ -122,7 +123,7 @@ void bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFi
 	}
 
 exit:
-	free(databuf);
+	if(databuf != NULL) free(databuf);
 	heap_caps_free(line_data);
 }		 
 
