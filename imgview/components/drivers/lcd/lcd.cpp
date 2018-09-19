@@ -90,7 +90,7 @@ void CMyLcd::setSpiBus(lcd_conf_t *lcd_conf)
     id.lcd_id = (id.id >> (8 * 3)) & 0xff;
 }
 
-inline void CMyLcd::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+void CMyLcd::setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
     xSemaphoreTakeRecursive(spi_mux, portMAX_DELAY);
     transmitCmdData(LCD_CASET, MAKEWORD(x0 >> 8, x0 & 0xFF, x1 >> 8, x1 & 0xFF));
@@ -218,6 +218,19 @@ void CMyLcd::drawBitmap(int16_t x, int16_t y, const uint16_t *bitmap, int16_t w,
         }
     }
     xSemaphoreGiveRecursive(spi_mux);
+}
+
+void CMyLcd::fillDataFast(const uint16_t *pData, uint16_t size)
+{
+	xSemaphoreTakeRecursive(spi_mux, portMAX_DELAY);
+	if (dma_mode) {
+		_fastSendBuf(pData, size);
+	} else {
+		for (int i = 0; i < size; i++) {
+			transmitData(SWAPBYTES(pData[i]), 1);
+		}
+	}
+	xSemaphoreGiveRecursive(spi_mux);
 }
 
 esp_err_t CMyLcd::drawBitmapFromFlashPartition(int16_t x, int16_t y, int16_t w, int16_t h, esp_partition_t* data_partition, int data_offset, int malloc_pixal_size, bool swap_bytes_en)
