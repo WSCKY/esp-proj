@@ -3,10 +3,11 @@
 
 #include "imgDecoder.h"
 
-imgDecoder::imgDecoder(const char *file, pDrawBitmap_t pFunc)
+imgDecoder::imgDecoder(const char *file, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen)
 {
 	path = file;
-	pDrawBitmap = pFunc;
+	pDrawInit = pDrawPrepare;
+	pFillData = pFillScreen;
 }
 
 imgDecoder::~imgDecoder()
@@ -14,7 +15,8 @@ imgDecoder::~imgDecoder()
 
 }
 
-void imgDecoder::decodeBMP()
+void imgDecoder::decodeBMP(const char *file)
 {
-	bmp_decode(path, pDrawBitmap);
+	if(file != NULL) path = file;
+	bmp_decode(path, pDrawInit, pFillData);
 }

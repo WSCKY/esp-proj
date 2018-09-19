@@ -12,11 +12,12 @@
 class imgDecoder {
 private:
 	const char *path;
-	pDrawBitmap_t pDrawBitmap;
+	pDrawPrepare_t pDrawInit;
+	pFillScreen_t pFillData;
 public:
-	imgDecoder(const char *file, pDrawBitmap_t pFunc);
+	imgDecoder(const char *file, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen);
 	virtual ~imgDecoder();
-	void decodeBMP();
+	void decodeBMP(const char *file);
 };
 
 #endif /* __cplusplus */
