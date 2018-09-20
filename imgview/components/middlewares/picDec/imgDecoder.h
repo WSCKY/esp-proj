@@ -6,6 +6,7 @@
 #include "esp_system.h"
 
 #include "bmpDec.h"
+#include "jpgDec.h"
 
 #ifdef __cplusplus
 
@@ -18,6 +19,7 @@ public:
 	imgDecoder(const char *file, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen);
 	virtual ~imgDecoder();
 	esp_err_t decodeBMP(const char *file);
+	esp_err_t decodeJPG(const char *file);
 };
 
 #endif /* __cplusplus */
