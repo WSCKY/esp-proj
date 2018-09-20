@@ -5,13 +5,14 @@
 #include "stdio.h"
 #include "esp_err.h"
 #include "esp_system.h"
+#include "ll_config.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef esp_err_t (*pDrawPrepare_t)(int16_t w, int16_t h);
-typedef void (*pFillScreen_t)(const uint16_t *data, int16_t lines);
+//typedef esp_err_t (*pDrawPrepare_t)(int16_t w, int16_t h);
+//typedef void (*pFillScreen_t)(const uint16_t *data, int16_t lines);
 
 //#define BMP_USE_MALLOC		1
 //#define BMP_DBUF_SIZE		2048
