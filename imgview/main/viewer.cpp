@@ -162,20 +162,18 @@ int lcd_log_vprintf(const char *fmt, va_list ap)
 	return ret;
 }
 
-uint16_t width = 0;
-esp_err_t setDrawAddr(int16_t w, int16_t h)
+esp_err_t setDrawAddr(ImgArea_t *pRect)
 {
-	lcd->setRotation(4);
-	if(w > lcd->width()) return ESP_FAIL;
-	if(h > lcd->height()) return ESP_FAIL;
-	width = w;
-	lcd->setAddrWindow(0, 0, w - 1, h - 1);
+	lcd->setRotation(2);
+	if((pRect->right + 1) > lcd->width()) return ESP_FAIL;
+	if((pRect->bottom + 1) > lcd->height()) return ESP_FAIL;
+	lcd->setAddrWindow(pRect->left, pRect->top, pRect->right, pRect->bottom);
 	return ESP_OK;
 }
 
-void fillData(const uint16_t *data, int16_t lines)
+void fillData(const uint16_t *data, uint16_t size)
 {
-	lcd->fillDataFast(data, lines * width);
+	lcd->fillDataFast(data, size);
 }
 
 char *fullname = NULL;
