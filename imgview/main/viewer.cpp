@@ -205,7 +205,7 @@ bool checkBMP(const char *name)
 
 extern "C" void app_main()
 {
-//	char buf[30] = {0};
+  LcdSize_t lcd_size = {128, 160};
   printf("Image Viewer.\n");
   lcd_conf_t lcd_pins = {
 	  .pin_num_miso = GPIO_NUM_25,
@@ -257,7 +257,7 @@ extern "C" void app_main()
   esp_err_t ret = ESP_OK;
 
   if(decoder == NULL) {
-    decoder = new imgDecoder("/sdcard/bmp/img2.bmp", setDrawAddr, fillData);
+    decoder = new imgDecoder(setDrawAddr, fillData, lcd_size);
   }
   while(1) {
   	  dir = opendir(SDCARD_PATH JPG_PATH);
