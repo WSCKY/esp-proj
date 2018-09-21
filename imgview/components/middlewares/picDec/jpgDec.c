@@ -58,25 +58,29 @@ static UINT outfunc(JDEC *decoder, void *bitmap, JRECT *rect)
     JpegDev *jd = (JpegDev *)decoder->device;
     uint8_t *in = (uint8_t *)bitmap;
     ImgArea_t area = {.left = rect->left, .right = rect->right, .top = rect->top, .bottom = rect->bottom};
-    jd->DrawPrepare(&area);
-    for (int y = rect->top; y <= rect->bottom; y ++) {
-        for (int x = rect->left; x <= rect->right; x ++) {
-            //We need to convert the 3 bytes in `in` to a rgb565 value.
-            uint16_t v = 0;
-            v|=((in[0]>>3)<<11);
-            v|=((in[1]>>2)<<5);
-            v|=((in[2]>>3)<<0);
-            jd->outFIFO[jd->outPos ++] = v;
-            if(jd->outPos >= PIXEL_FIFO_SIZE) {
-            	jd->FillPixel(jd->outFIFO, jd->outPos);
-            	jd->outPos = 0;
-            }
-            in += 3;
-        }
-    }
-    if(jd->outPos > 0) {
-    	jd->FillPixel(jd->outFIFO, jd->outPos);
-    	jd->outPos = 0;
+    if(jd->DrawPrepare(&area) == ESP_OK) {
+		for (int y = rect->top; y <= rect->bottom; y ++) {
+			for (int x = rect->left; x <= rect->right; x ++) {
+				//We need to convert the 3 bytes in `in` to a rgb565 value.
+				uint16_t v = 0;
+				v|=((in[0]>>3)<<11);
+				v|=((in[1]>>2)<<5);
+				v|=((in[2]>>3)<<0);
+				jd->outFIFO[jd->outPos ++] = v;
+				if(jd->outPos >= PIXEL_FIFO_SIZE) {
+					jd->FillPixel(jd->outFIFO, jd->outPos);
+					jd->outPos = 0;
+				}
+				in += 3;
+			}
+		}
+		if(jd->outPos > 0) {
+			jd->FillPixel(jd->outFIFO, jd->outPos);
+			jd->outPos = 0;
+		}
+    } else {
+// exit.
+//    	ESP_LOGW(TAG, "out of display area.");
     }
     return 1;
 }
