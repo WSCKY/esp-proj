@@ -85,11 +85,21 @@ static UINT outfunc(JDEC *decoder, void *bitmap, JRECT *rect)
     return 1;
 }
 
+static BYTE AutoScale(JDEC *dec, LcdSize_t *sz)
+{
+	BYTE scale = 0;
+	while(scale <= 3) {
+		if(((dec->width >> scale) <= sz->width) && ((dec->height >> scale) <= sz->height)) break;
+		scale ++;
+	}
+	return scale;
+}
+
 //Size of the work space for the jpeg decoder.
 #define WORKSZ 3100
 
 //Decode the embedded image into pixel lines that can be used with the rest of the logic.
-esp_err_t jpg_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen)
+esp_err_t jpg_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen, LcdSize_t size)
 {
     char *work = NULL;
     int r;
@@ -134,8 +144,14 @@ esp_err_t jpg_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_
         goto err;
     }
     ESP_LOGI(TAG, "JPG, size:%dx%d", decoder.width, decoder.height);
+    BYTE scl = AutoScale(&decoder, &size);
+    if(scl > 3) {
+    	ESP_LOGE(TAG, "JPG file too large. <(1024x1024)");
+		ret = ESP_ERR_NOT_SUPPORTED;
+		goto err;
+    }
 
-    r = jd_decomp(&decoder, outfunc, 0);
+    r = jd_decomp(&decoder, outfunc, scl);
     if (r!=JDR_OK) {
         ESP_LOGE(TAG, "Image decoder: jd_decode failed (%d)", r);
         ret=ESP_ERR_NOT_SUPPORTED;
