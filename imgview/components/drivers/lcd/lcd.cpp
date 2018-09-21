@@ -220,11 +220,11 @@ void CMyLcd::drawBitmap(int16_t x, int16_t y, const uint16_t *bitmap, int16_t w,
     xSemaphoreGiveRecursive(spi_mux);
 }
 
-void CMyLcd::fillDataFast(const uint16_t *pData, uint16_t size)
+void CMyLcd::fillDataFast(const uint16_t *pData, uint16_t size, bool swap)
 {
 	xSemaphoreTakeRecursive(spi_mux, portMAX_DELAY);
 	if (dma_mode) {
-		_fastSendBuf(pData, size);
+		_fastSendBuf(pData, size, swap);
 	} else {
 		for (int i = 0; i < size; i++) {
 			transmitData(SWAPBYTES(pData[i]), 1);

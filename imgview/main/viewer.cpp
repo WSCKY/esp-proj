@@ -171,9 +171,9 @@ esp_err_t setDrawAddr(ImgArea_t *pRect)
 	return ESP_OK;
 }
 
-void fillData(const uint16_t *data, uint16_t size)
+void fillData(const uint16_t *data, uint16_t size, bool swap)
 {
-	lcd->fillDataFast(data, size);
+	lcd->fillDataFast(data, size, swap);
 }
 
 char *fullname = NULL;

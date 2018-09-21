@@ -164,7 +164,7 @@ public:
      * @param h height of image in bmp array
      */
     void drawBitmap(int16_t x, int16_t y, const uint16_t *bitmap, int16_t w, int16_t h);
-    void fillDataFast(const uint16_t *pData, uint16_t size);
+    void fillDataFast(const uint16_t *pData, uint16_t size, bool swap = true);
 
     /**
      * @brief Load bitmap data from flash partition and fill the pixels on LCD screen

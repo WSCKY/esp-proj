@@ -116,14 +116,14 @@ esp_err_t bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_
 						pixel_cnt = 0;
 						line_cnt ++;
 						if(line_cnt >= PARALLEL_LINES) {
-							pFillScreen(line_data, line_cnt * ImgWidth);
+							pFillScreen(line_data, line_cnt * ImgWidth, true);
 							line_cnt = 0;
 						}
 					}
 				}
 			}
 			if(line_cnt > 0)
-				pFillScreen(line_data, line_cnt * ImgWidth);
+				pFillScreen(line_data, line_cnt * ImgWidth, true);
 			fclose(f);
 		} else {
 			ESP_LOGE(TAG, "can't read data from %s", path);

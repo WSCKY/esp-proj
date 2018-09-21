@@ -16,6 +16,6 @@ typedef struct {
 } LcdSize_t;
 
 typedef esp_err_t (*pDrawPrepare_t)(ImgArea_t *);
-typedef void (*pFillScreen_t)(const uint16_t *, uint16_t);
+typedef void (*pFillScreen_t)(const uint16_t *, uint16_t, bool);
 
 #endif /* __LL_CONFIG_H */

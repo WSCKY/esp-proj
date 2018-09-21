@@ -53,7 +53,7 @@ static UINT infunc(JDEC *decoder, BYTE *buf, UINT len)
 
 //Output function. Re-encodes the RGB888 data from the decoder as big-endian RGB565 and
 //stores it in the outData array of the JpegDev structure.
-static UINT outfunc(JDEC *decoder, void *bitmap, JRECT *rect) 
+static UINT outfunc(JDEC *decoder, void *bitmap, JRECT *rect)
 {
     JpegDev *jd = (JpegDev *)decoder->device;
     uint8_t *in = (uint8_t *)bitmap;
@@ -68,14 +68,14 @@ static UINT outfunc(JDEC *decoder, void *bitmap, JRECT *rect)
 				v|=((in[2]>>3)<<0);
 				jd->outFIFO[jd->outPos ++] = v;
 				if(jd->outPos >= PIXEL_FIFO_SIZE) {
-					jd->FillPixel(jd->outFIFO, jd->outPos);
+					jd->FillPixel(jd->outFIFO, jd->outPos, true);
 					jd->outPos = 0;
 				}
 				in += 3;
 			}
 		}
 		if(jd->outPos > 0) {
-			jd->FillPixel(jd->outFIFO, jd->outPos);
+			jd->FillPixel(jd->outFIFO, jd->outPos, true);
 			jd->outPos = 0;
 		}
     } else {
