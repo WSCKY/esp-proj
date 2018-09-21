@@ -16,7 +16,7 @@ extern "C" {
  *         - ESP_ERR_NO_MEM if out of memory
  *         - ESP_OK on succesful decode
  */
-esp_err_t jpg_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen);
+esp_err_t jpg_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_t pFillScreen, LcdSize_t size);
 
 #ifdef __cplusplus
 }
