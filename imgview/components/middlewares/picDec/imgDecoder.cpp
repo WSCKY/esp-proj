@@ -26,5 +26,5 @@ esp_err_t imgDecoder::decodeJPG(const char *file)
 {
 	if(file == NULL) return ESP_ERR_INVALID_ARG;
 	path = file;
-	return jpg_decode(path, pDrawInit, pFillData);
+	return jpg_decode(path, pDrawInit, pFillData, LcdSize);
 }
