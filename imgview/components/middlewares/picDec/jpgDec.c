@@ -27,7 +27,7 @@ format if you want to use a different image file.
 
 const char *TAG = "JPEG_DEC";
 
-#define PARALLEL_LINES         8
+#define PIXEL_FIFO_SIZE        320
 
 //Data that is passed from the decoder function to the infunc/outfunc functions.
 typedef struct {
@@ -36,10 +36,8 @@ typedef struct {
     pDrawPrepare_t DrawPrepare;     //Initialize the displayer to draw pixel
     pFillScreen_t FillPixel;        //pointer to a function to fill pixel data to displayer.
     uint16_t *outFIFO;              //fifo to store rgb data.
-    uint16_t fifo_size;             //fifo size in uint16_t.
     int outPos;                     //Current position of rgb data;
 } JpegDev;
-
 
 //Input function for jpeg decoder. Just returns bytes from the inData field of the JpegDev structure.
 static UINT infunc(JDEC *decoder, BYTE *buf, UINT len) 
@@ -59,6 +57,8 @@ static UINT outfunc(JDEC *decoder, void *bitmap, JRECT *rect)
 {
     JpegDev *jd = (JpegDev *)decoder->device;
     uint8_t *in = (uint8_t *)bitmap;
+    ImgArea_t area = {.left = rect->left, .right = rect->right, .top = rect->top, .bottom = rect->bottom};
+    jd->DrawPrepare(&area);
     for (int y = rect->top; y <= rect->bottom; y ++) {
         for (int x = rect->left; x <= rect->right; x ++) {
             //We need to convert the 3 bytes in `in` to a rgb565 value.
@@ -66,19 +66,16 @@ static UINT outfunc(JDEC *decoder, void *bitmap, JRECT *rect)
             v|=((in[0]>>3)<<11);
             v|=((in[1]>>2)<<5);
             v|=((in[2]>>3)<<0);
-            //The LCD wants the 16-bit value in big-endian, so swap bytes
-//            v=(v>>8)|(v<<8);
-//            jd->outData[y][x]=v;
             jd->outFIFO[jd->outPos ++] = v;
-            if(jd->outPos >= jd->fifo_size) {
-            	jd->FillPixel(jd->outFIFO, jd->outPos / decoder->width);
+            if(jd->outPos >= PIXEL_FIFO_SIZE) {
+            	jd->FillPixel(jd->outFIFO, jd->outPos);
             	jd->outPos = 0;
             }
-            in+=3;
+            in += 3;
         }
     }
     if(jd->outPos > 0) {
-    	jd->FillPixel(jd->outFIFO, jd->outPos / decoder->width);
+    	jd->FillPixel(jd->outFIFO, jd->outPos);
     	jd->outPos = 0;
     }
     return 1;
@@ -94,30 +91,12 @@ esp_err_t jpg_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_
     int r;
     JDEC decoder;
     JpegDev jd;
-//    *pixels=NULL;
     esp_err_t ret = ESP_OK;
     FILE *f = fopen(path, "r"); // read only.
     if(f == NULL) {
     	ESP_LOGE(TAG, "can't open file %s", path);
     	return ESP_FAIL;
     }
-    ESP_LOGI(TAG, "file:%s", path);
-
-    //Alocate pixel memory. Each line is an array of IMAGE_W 16-bit pixels; the `*pixels` array itself contains pointers to these lines.
-//    *pixels=calloc(IMAGE_H, sizeof(uint16_t*));
-//    if (*pixels==NULL) {
-//        ESP_LOGE(TAG, "Error allocating memory for lines");
-//        ret=ESP_ERR_NO_MEM;
-//        goto err;
-//    }
-//    for (int i=0; i<IMAGE_H; i++) {
-//        (*pixels)[i]=malloc(IMAGE_W*sizeof(uint16_t));
-//        if ((*pixels)[i]==NULL) {
-//            ESP_LOGE(TAG, "Error allocating memory for line %d", i);
-//            ret=ESP_ERR_NO_MEM;
-//            goto err;
-//        }
-//    }
 
     //Allocate the work space for the jpeg decoder.
     work = calloc(WORKSZ, 1);
@@ -135,6 +114,14 @@ esp_err_t jpg_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_
     jd.outFIFO = NULL;
     jd.outPos = 0;
 
+    //Alocate pixel memory.
+	jd.outFIFO = (uint16_t *)heap_caps_malloc(PIXEL_FIFO_SIZE * sizeof(uint16_t), MALLOC_CAP_DMA);
+	if(jd.outFIFO == NULL) {
+		ESP_LOGE(TAG, "Cannot allocate rgb fifo");
+		ret = ESP_ERR_NO_MEM;
+		goto err;
+	}
+
     //Prepare and decode the jpeg.
     r = jd_prepare(&decoder, infunc, work, WORKSZ, (void*)&jd);
     if (r != JDR_OK) {
@@ -142,19 +129,8 @@ esp_err_t jpg_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_
         ret = ESP_ERR_NOT_SUPPORTED;
         goto err;
     }
-    ESP_LOGI(TAG, "size:%dx%d", decoder.width, decoder.height);
-    jd.outFIFO = (uint16_t *)heap_caps_malloc(decoder.width * sizeof(uint16_t) * PARALLEL_LINES, MALLOC_CAP_DMA);
-    jd.fifo_size = decoder.width * PARALLEL_LINES;
-    if(jd.outFIFO == NULL) {
-    	ESP_LOGE(TAG, "Cannot allocate rgb fifo");
-		ret = ESP_ERR_NO_MEM;
-		goto err;
-    }
-    if(pDrawPrepare(decoder.width, decoder.height) != ESP_OK) {
-    	ESP_LOGE(TAG, "JPEG size not supported.");
-    	ret = ESP_ERR_NOT_SUPPORTED;
-    	goto err;
-    }
+    ESP_LOGI(TAG, "JPG, size:%dx%d", decoder.width, decoder.height);
+
     r = jd_decomp(&decoder, outfunc, 0);
     if (r!=JDR_OK) {
         ESP_LOGE(TAG, "Image decoder: jd_decode failed (%d)", r);
@@ -162,17 +138,9 @@ esp_err_t jpg_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_
         goto err;
     }
 
-//    //All done! Free the work area (as we don't need it anymore) and return victoriously.
-//    free(work);
-//    return ret;
+    //All done! Free the work area (as we don't need it anymore) and return victoriously.
 err:
     //Something went wrong! Exit cleanly, de-allocating everything we allocated.
-//    if (*pixels!=NULL) {
-//        for (int i=0; i<IMAGE_H; i++) {
-//            free((*pixels)[i]);
-//        }
-//        free(*pixels);
-//    }
 	fclose(f);
     free(work);
     if(jd.outFIFO != NULL)
