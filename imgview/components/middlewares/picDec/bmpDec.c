@@ -31,6 +31,7 @@ esp_err_t bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_
 
 	uint8_t extra = 0;
 	uint16_t line_bytes = 0;
+	ImgArea_t ImgRect = {0, 0, 0, 0};
 
 	databuf = (uint8_t *)calloc(1, sizeof(BITMAPINFO));
 	assert(databuf != NULL);
@@ -66,7 +67,11 @@ esp_err_t bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_
 				line_bytes = ImgWidth * color_byte;
 			extra = line_bytes - ImgWidth * color_byte;
 
-			if(pDrawPrepare(ImgWidth, ImgHeight) != ESP_OK) {
+			ImgRect.left = 0;
+			ImgRect.top = 0;
+			ImgRect.right = ImgWidth - 1;
+			ImgRect.bottom = ImgHeight - 1;
+			if(pDrawPrepare(&ImgRect) != ESP_OK) {
 				ESP_LOGE(TAG, "BMP Size unsupport.");
 				fclose(f);
 				ret = ESP_FAIL;
@@ -111,14 +116,14 @@ esp_err_t bmp_decode(const char *path, pDrawPrepare_t pDrawPrepare, pFillScreen_
 						pixel_cnt = 0;
 						line_cnt ++;
 						if(line_cnt >= PARALLEL_LINES) {
-							pFillScreen(line_data, line_cnt);
+							pFillScreen(line_data, line_cnt * ImgWidth);
 							line_cnt = 0;
 						}
 					}
 				}
 			}
 			if(line_cnt > 0)
-				pFillScreen(line_data, line_cnt);
+				pFillScreen(line_data, line_cnt * ImgWidth);
 			fclose(f);
 		} else {
 			ESP_LOGE(TAG, "can't read data from %s", path);
