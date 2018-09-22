@@ -67,6 +67,7 @@ const char *imgDecoder::imgType2String(ImgType_t type)
 esp_err_t imgDecoder::decodeBMP(const char *file)
 {
 	if(file == NULL) return ESP_ERR_INVALID_ARG;
+	if(checkType(file) != Img_BMP) return ESP_ERR_INVALID_ARG;
 	path = file;
 	return bmp_decode(path, pDrawInit, pFillData);
 }
@@ -74,6 +75,7 @@ esp_err_t imgDecoder::decodeBMP(const char *file)
 esp_err_t imgDecoder::decodeJPG(const char *file)
 {
 	if(file == NULL) return ESP_ERR_INVALID_ARG;
+	if(checkType(file) != Img_JPG) return ESP_ERR_INVALID_ARG;
 	path = file;
 	return jpg_decode(path, pDrawInit, pFillData, LcdSize);
 }
