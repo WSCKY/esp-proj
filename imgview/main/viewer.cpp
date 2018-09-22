@@ -259,6 +259,11 @@ extern "C" void app_main()
   if(decoder == NULL) {
     decoder = new imgDecoder(setDrawAddr, fillData, lcd_size);
   }
+  ESP_LOGI(TAG, "file type: %s", decoder->imgType2String(decoder->checkType("HelloWorld.jpg")));
+  ESP_LOGI(TAG, "file type: %s", decoder->imgType2String(decoder->checkType("HelloWorld.gif")));
+  ESP_LOGI(TAG, "file type: %s", decoder->imgType2String(decoder->checkType("HelloWorld.bmp")));
+  ESP_LOGI(TAG, "file type: %s", decoder->imgType2String(decoder->checkType("HelloWorld.GIF")));
+  ESP_LOGI(TAG, "file type: %s", decoder->imgType2String(decoder->checkType("HelloWorld.TXT")));
   while(1) {
   	  dir = opendir(SDCARD_PATH JPG_PATH);
   	  while((dc = readdir(dir)) != NULL) {
