@@ -20,6 +20,7 @@ static const char *TAG = "Viewer";
 #define SDCARD_PATH      "/sdcard"
 #define BMP_PATH         "/bmp"
 #define JPG_PATH         "/jpg"
+#define IMG_PATH         "/img"
 
 /*
 
@@ -190,19 +191,6 @@ char *getname(const char *a, const char *b)
 	return fullname;
 }
 
-bool checkBMP(const char *name)
-{
-	while(*name != '.' && *name != '\0')
-		name ++;
-	if(*name == '.') {
-		name ++;
-		if((*name == 'B' && *(name + 1) == 'M' && *(name + 2) == 'P') ||
-		   (*name == 'b' && *(name + 1) == 'm' && *(name + 2) == 'p'))
-			return true;
-	}
-	return false;
-}
-
 extern "C" void app_main()
 {
   LcdSize_t lcd_size = {128, 160};
@@ -265,11 +253,11 @@ extern "C" void app_main()
   ESP_LOGI(TAG, "file type: %s", decoder->imgType2String(decoder->checkType("HelloWorld.GIF")));
   ESP_LOGI(TAG, "file type: %s", decoder->imgType2String(decoder->checkType("HelloWorld.TXT")));
   while(1) {
-  	  dir = opendir(SDCARD_PATH JPG_PATH);
+  	  dir = opendir(SDCARD_PATH IMG_PATH);
   	  while((dc = readdir(dir)) != NULL) {
-  		  if(dc->d_type == 1) {// && checkJPG(dc->d_name)
+  		  if(dc->d_type == 1) {
   			  lcd->fillScreen(lcd->color565(0x80, 0x80, 0x80));
-  			  ret = decoder->decodeJPG((const char *)getname(SDCARD_PATH JPG_PATH "/", dc->d_name));
+  			  ret = decoder->decode((const char *)getname(SDCARD_PATH IMG_PATH "/", dc->d_name));
   			  lcd->setRotation(2);
   			  lcd->setTextColor(COLOR_WHITE);
   			  lcd->drawString(dc->d_name, 0, 0);
@@ -283,6 +271,25 @@ extern "C" void app_main()
   	  closedir(dir);
   	  vTaskDelay(2000 / portTICK_RATE_MS);
     }
+//  while(1) {
+//  	  dir = opendir(SDCARD_PATH JPG_PATH);
+//  	  while((dc = readdir(dir)) != NULL) {
+//  		  if(dc->d_type == 1) {// && checkJPG(dc->d_name)
+//  			  lcd->fillScreen(lcd->color565(0x80, 0x80, 0x80));
+//  			  ret = decoder->decodeJPG((const char *)getname(SDCARD_PATH JPG_PATH "/", dc->d_name));
+//  			  lcd->setRotation(2);
+//  			  lcd->setTextColor(COLOR_WHITE);
+//  			  lcd->drawString(dc->d_name, 0, 0);
+//  			  if(ret != ESP_OK) {
+//  				  lcd->setTextColor(COLOR_RED);
+//  				  lcd->drawString("Image decode failed!", 4, 76);
+//  			  }
+//  			  vTaskDelay(2000 / portTICK_RATE_MS);
+//  		  }
+//  	  }
+//  	  closedir(dir);
+//  	  vTaskDelay(2000 / portTICK_RATE_MS);
+//    }
 //  while(1) {
 //	  dir = opendir(SDCARD_PATH BMP_PATH);
 //	  while((dc = readdir(dir)) != NULL) {
