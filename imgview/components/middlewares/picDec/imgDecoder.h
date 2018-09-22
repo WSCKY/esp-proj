@@ -38,6 +38,7 @@ public:
 	virtual ~imgDecoder();
 	ImgType_t checkType(const char *file);
 	const char *imgType2String(ImgType_t type);
+	esp_err_t decode(const char *file);
 	esp_err_t decodeBMP(const char *file);
 	esp_err_t decodeJPG(const char *file);
 };

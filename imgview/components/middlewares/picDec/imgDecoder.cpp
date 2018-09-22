@@ -64,6 +64,24 @@ const char *imgDecoder::imgType2String(ImgType_t type)
 	return ImgTypes[i].suffix;
 }
 
+esp_err_t imgDecoder::decode(const char *file)
+{
+	if(file == NULL) return ESP_ERR_INVALID_ARG;
+	switch(checkType(file)) {
+	case Img_BMP:
+		path = file;
+		return decodeBMP(file);
+	case Img_JPG:
+		path = file;
+		return decodeJPG(file);
+	case Img_GIF:
+		return ESP_ERR_NOT_SUPPORTED;
+	case Img_Unknow:
+	default:
+		return ESP_ERR_INVALID_ARG;
+	}
+}
+
 esp_err_t imgDecoder::decodeBMP(const char *file)
 {
 	if(file == NULL) return ESP_ERR_INVALID_ARG;
