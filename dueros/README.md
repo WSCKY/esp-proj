@@ -19,4 +19,4 @@ To run this example you need ESP32 LyraT or compatible board:
 - DuerOS profile is device unique ID. 
 - This example size of binary image is 1.3MB, please use `ADF_APTH/examples/dueros/partitions_singleapp.csv` instead of `IDF_PATH/components/partition_table/partitions_singleapp.csv`.
 
-
+test based on esp-adf commit 'c8609a8ffb8f655eb49e02367c3d00cb1b2bc0db'
