@@ -1,0 +1,16 @@
+1>     esp_periph_init
+1.1>   periph_sdcard_init
+1.2>   esp_periph_start
+1.3>   periph_sdcard_is_mounted
+2>     audio_hal_init
+3>     audio_pipeline_init
+3.1>   fatfs_stream_init
+3.2>   i2s_stream_init
+3.3>   wav_encoder_init
+3.4>   audio_pipeline_register (3)
+3.5>   audio_pipeline_link
+3.6>   audio_element_set_uri
+4>     audio_event_iface_init
+4.1>   audio_pipeline_set_listener
+4.2>   audio_event_iface_set_listener
+5>     audio_pipeline_run(pipeline);
