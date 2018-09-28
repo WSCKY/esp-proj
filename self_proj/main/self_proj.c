@@ -62,11 +62,14 @@ void app_main()
 	ESP_LOGI(sTAG, "log level is INFORMATION");
 
 	printf("flash led ...\n");
+	int cnt = 0;
 	while(1) {
 		gpio_set_level(LED_GPIO_PIN, 0);
 		vTaskDelay(200 / portTICK_PERIOD_MS);
 		gpio_set_level(LED_GPIO_PIN, 1);
 		vTaskDelay(200 / portTICK_PERIOD_MS);
+		printf("same line: %d\r", cnt ++);
+		fflush(stdout);
 	}
 
 /* Test code -2 */
