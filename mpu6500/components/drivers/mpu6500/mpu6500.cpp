@@ -6,6 +6,7 @@
 #include "mpu6500.h"
 
 static const char *TAG = "MPU6500";
+static const float Gravity = 9.8f;
 
 #define MPU_CHECK(a, str, ret_val) \
     if (!(a)) { \
@@ -60,6 +61,9 @@ MPU6500::MPU6500(mpu6500_conf_t *mpu_conf)
 	_wr_reg(0x1C, 0x10);
 	_wr_reg(0x1B, 0x18);
 	vTaskDelay(10 / portTICK_RATE_MS);
+	_acc_fs = acc_fs_8g;
+	_gyr_fs = gyr_fs_2000dps;
+	_update_factor();
 	raw_data = (mpu6500_raw_t *)malloc(sizeof(mpu6500_raw_t));
 	assert(raw_data != NULL);
 	unit_data = (mpu6500_unit_t *)malloc(sizeof(mpu6500_unit_t));
@@ -90,6 +94,44 @@ esp_err_t MPU6500::_rd_reg(uint8_t reg, uint8_t num)
 	return spi_device_transmit(spi_wr, &t);
 }
 
+void MPU6500::_update_factor()
+{
+	switch(_gyr_fs) {
+	case gyr_fs_250dps:
+		gyr_fs_fact = 500.0f / 65536.0f;
+		break;
+	case gyr_fs_500dps:
+		gyr_fs_fact = 1000.0f / 65536.0f;
+		break;
+	case gyr_fs_1000dps:
+		gyr_fs_fact = 2000.0f / 65536.0f;
+		break;
+	case gyr_fs_2000dps:
+		gyr_fs_fact = 4000.0f / 65536.0f;
+		break;
+	default:
+		gyr_fs_fact = 4000.0f / 65536.0f;
+		break;
+	}
+	switch(_acc_fs) {
+	case acc_fs_2g:
+		acc_fs_fact = (4.0f * Gravity) / 65536.0f;
+		break;
+	case acc_fs_4g:
+		acc_fs_fact = (8.0f * Gravity) / 65536.0f;
+		break;
+	case acc_fs_8g:
+		acc_fs_fact = (16.0f * Gravity) / 65536.0f;
+		break;
+	case acc_fs_16g:
+		acc_fs_fact = (32.0f * Gravity) / 65536.0f;
+		break;
+	default:
+		acc_fs_fact = (16.0f * Gravity) / 65536.0f;
+		break;
+	}
+}
+
 esp_err_t MPU6500::update()
 {
 	esp_err_t ret = _rd_reg(0x3B, 14);
@@ -115,13 +157,13 @@ esp_err_t MPU6500::update()
 	((int8_t *)&(raw_data->gyr.z))[0] = _rx_buf[14];
 	((int8_t *)&(raw_data->gyr.z))[1] = _rx_buf[13];
 
-	unit_data->acc.x = raw_data->acc.x * 0.002392578125f;
-	unit_data->acc.y = raw_data->acc.y * 0.002392578125f;
-	unit_data->acc.z = raw_data->acc.z * 0.002392578125f;
+	unit_data->acc.x = raw_data->acc.x * acc_fs_fact;
+	unit_data->acc.y = raw_data->acc.y * acc_fs_fact;
+	unit_data->acc.z = raw_data->acc.z * acc_fs_fact;
 	unit_data->tmp = (raw_data->tmp / 340.0f) + 36.53f;
-	unit_data->gyr.x = raw_data->gyr.x * 0.06103515625f;
-	unit_data->gyr.y = raw_data->gyr.y * 0.06103515625f;
-	unit_data->gyr.z = raw_data->gyr.z * 0.06103515625f;
+	unit_data->gyr.x = raw_data->gyr.x * gyr_fs_fact;
+	unit_data->gyr.y = raw_data->gyr.y * gyr_fs_fact;
+	unit_data->gyr.z = raw_data->gyr.z * gyr_fs_fact;
 	return ret;
 }
 
