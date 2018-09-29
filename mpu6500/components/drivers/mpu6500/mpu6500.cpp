@@ -94,7 +94,28 @@ esp_err_t MPU6500::_rd_reg(uint8_t reg, uint8_t num)
 	return spi_device_transmit(spi_wr, &t);
 }
 
-void MPU6500::_update_factor()
+void MPU6500::_update_acc_factor()
+{
+	switch(_acc_fs) {
+	case acc_fs_2g:
+		acc_fs_fact = (4.0f * Gravity) / 65536.0f;
+		break;
+	case acc_fs_4g:
+		acc_fs_fact = (8.0f * Gravity) / 65536.0f;
+		break;
+	case acc_fs_8g:
+		acc_fs_fact = (16.0f * Gravity) / 65536.0f;
+		break;
+	case acc_fs_16g:
+		acc_fs_fact = (32.0f * Gravity) / 65536.0f;
+		break;
+	default:
+		acc_fs_fact = (16.0f * Gravity) / 65536.0f;
+		break;
+	}
+}
+
+void MPU6500::_update_gyr_factor()
 {
 	switch(_gyr_fs) {
 	case gyr_fs_250dps:
@@ -113,23 +134,12 @@ void MPU6500::_update_factor()
 		gyr_fs_fact = 4000.0f / 65536.0f;
 		break;
 	}
-	switch(_acc_fs) {
-	case acc_fs_2g:
-		acc_fs_fact = (4.0f * Gravity) / 65536.0f;
-		break;
-	case acc_fs_4g:
-		acc_fs_fact = (8.0f * Gravity) / 65536.0f;
-		break;
-	case acc_fs_8g:
-		acc_fs_fact = (16.0f * Gravity) / 65536.0f;
-		break;
-	case acc_fs_16g:
-		acc_fs_fact = (32.0f * Gravity) / 65536.0f;
-		break;
-	default:
-		acc_fs_fact = (16.0f * Gravity) / 65536.0f;
-		break;
-	}
+}
+
+void MPU6500::_update_factor()
+{
+	_update_acc_factor();
+	_update_gyr_factor();
 }
 
 esp_err_t MPU6500::update()
@@ -175,6 +185,22 @@ mpu6500_raw_t MPU6500::get_raw()
 mpu6500_unit_t MPU6500::get_unit()
 {
 	return *unit_data;
+}
+
+esp_err_t MPU6500::set_acc_scale(acc_fs_t scale)
+{
+	MPU_CHECK(scale <= acc_fs_16g, "Invalid param", ESP_ERR_INVALID_ARG);
+	esp_err_t ret = _rd_reg(0x1C, 1);
+	if(ret == ESP_OK) {
+		uint8_t tmp = _rx_buf[1];
+		tmp &= 0xE7;
+		tmp |= (scale << 3);
+		ret = _wr_reg(0x1C, tmp);
+		if(ret == ESP_OK) {
+			_acc_fs = scale;
+			_update_acc_factor();
+		}
+	}
 }
 
 esp_err_t MPU6500::get_id(uint8_t *id)
