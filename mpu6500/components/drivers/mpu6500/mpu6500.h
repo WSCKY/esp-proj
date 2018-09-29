@@ -73,9 +73,13 @@ class MPU6500 {
 private:
 	spi_device_handle_t spi_wr = NULL;
 	uint8_t *_tx_buf = NULL, *_rx_buf = NULL;
+	gyr_fs_t _gyr_fs = gyr_fs_2000dps;
+	acc_fs_t _acc_fs = acc_fs_8g;
+	float gyr_fs_fact = 0.0f, acc_fs_fact = 0.0f;
 	mpu6500_raw_t *raw_data = NULL;
 	mpu6500_unit_t *unit_data = NULL;
 	SemaphoreHandle_t mpu6500_mux;
+	void _update_factor();
 	esp_err_t _wr_reg(uint8_t reg, uint8_t val);
 	esp_err_t _rd_reg(uint8_t reg, uint8_t num);
 public:
