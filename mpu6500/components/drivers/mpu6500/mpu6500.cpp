@@ -170,7 +170,7 @@ esp_err_t MPU6500::update()
 	unit_data->acc.x = raw_data->acc.x * acc_fs_fact;
 	unit_data->acc.y = raw_data->acc.y * acc_fs_fact;
 	unit_data->acc.z = raw_data->acc.z * acc_fs_fact;
-	unit_data->tmp = (raw_data->tmp / 340.0f) + 36.53f;
+	unit_data->tmp = (raw_data->tmp / 333.87f) + 21.0f;
 	unit_data->gyr.x = raw_data->gyr.x * gyr_fs_fact;
 	unit_data->gyr.y = raw_data->gyr.y * gyr_fs_fact;
 	unit_data->gyr.z = raw_data->gyr.z * gyr_fs_fact;
