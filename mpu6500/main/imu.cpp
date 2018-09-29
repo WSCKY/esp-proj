@@ -38,10 +38,14 @@ extern "C" void app_main()
 	  }
   }
   ESP_LOGI(TAG, "IMU ID is 0x%x.", imu_id);
-
+  ESP_LOGI(TAG, "set acc scale to +-16g");
+  if(imu->set_acc_scale(acc_fs_16g) != ESP_OK)
+	  ESP_LOGE(TAG, "set acc scale failed");
+  mpu6500_unit_t data;
+  ESP_LOGI(TAG, "measure continuously");
   while(1) {
 	  imu->update();
-	  mpu6500_unit_t data = imu->get_unit();
+	  data = imu->get_unit();
 	  printf("\033[0;34m[ax:%.2f, ay:%.2f, az:%.2f, tmp:%.2f, gx:%.2f, gy:%.2f, gz:%.2f]\r\033[0m"
 			  , data.acc.x, data.acc.y, data.acc.z, data.tmp, data.gyr.x, data.gyr.y, data.gyr.z);
 	  vTaskDelay(200 / portTICK_RATE_MS);
