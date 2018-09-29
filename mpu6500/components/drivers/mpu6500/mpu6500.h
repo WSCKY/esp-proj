@@ -90,6 +90,7 @@ public:
 	mpu6500_raw_t get_raw();
 	mpu6500_unit_t get_unit();
 	esp_err_t set_acc_scale(acc_fs_t scale);
+	esp_err_t set_gyr_scale(gyr_fs_t scale);
 	esp_err_t get_id(uint8_t *id);
 	virtual ~MPU6500();
 };

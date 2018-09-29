@@ -204,6 +204,23 @@ esp_err_t MPU6500::set_acc_scale(acc_fs_t scale)
 	return ret;
 }
 
+esp_err_t MPU6500::set_gyr_scale(gyr_fs_t scale)
+{
+	MPU_CHECK(scale <= gyr_fs_2000dps, "Invalid param", ESP_ERR_INVALID_ARG);
+	esp_err_t ret = _rd_reg(0x1B, 1);
+	if(ret == ESP_OK) {
+		uint8_t tmp = _rx_buf[1];
+		tmp &= 0xE7;
+		tmp |= (scale << 3);
+		ret = _wr_reg(0x1B, tmp);
+		if(ret == ESP_OK) {
+			_gyr_fs = scale;
+			_update_gyr_factor();
+		}
+	}
+	return ret;
+}
+
 esp_err_t MPU6500::get_id(uint8_t *id)
 {
 	esp_err_t ret = _rd_reg(0x75, 1);
