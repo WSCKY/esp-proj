@@ -201,6 +201,7 @@ esp_err_t MPU6500::set_acc_scale(acc_fs_t scale)
 			_update_acc_factor();
 		}
 	}
+	return ret;
 }
 
 esp_err_t MPU6500::get_id(uint8_t *id)
