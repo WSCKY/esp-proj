@@ -41,6 +41,9 @@ extern "C" void app_main()
   ESP_LOGI(TAG, "set acc scale to +-16g");
   if(imu->set_acc_scale(acc_fs_16g) != ESP_OK)
 	  ESP_LOGE(TAG, "set acc scale failed");
+  ESP_LOGI(TAG, "set gyr scale to +-1000dps");
+  if(imu->set_gyr_scale(gyr_fs_1000dps) != ESP_OK)
+	  ESP_LOGE(TAG, "set gyr scale failed");
   mpu6500_unit_t data;
   ESP_LOGI(TAG, "measure continuously");
   while(1) {
