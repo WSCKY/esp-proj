@@ -72,18 +72,22 @@ MPU6500::MPU6500(mpu6500_conf_t *mpu_conf)
 
 esp_err_t MPU6500::_wr_reg(uint8_t reg, uint8_t val)
 {
+	xSemaphoreTakeRecursive(mpu6500_mux, portMAX_DELAY);
 	spi_transaction_t t;
 	memset(&t, 0, sizeof(t));
 	t.length = 8 * 2,                 // data length in bits
 	t.tx_data[0] = reg,               // The first byte is reg
 	t.tx_data[1] = val,               // The second byte is val
 	t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
-	return spi_device_transmit(spi_wr, &t); //Transmit!
+	esp_err_t ret = spi_device_transmit(spi_wr, &t); //Transmit!
+	xSemaphoreGiveRecursive(mpu6500_mux);
+	return ret;
 }
 
 esp_err_t MPU6500::_rd_reg(uint8_t reg, uint8_t num)
 {
 	MPU_CHECK(num <= 14, "Invalid param", ESP_ERR_INVALID_ARG);
+	xSemaphoreTakeRecursive(mpu6500_mux, portMAX_DELAY);
 	_tx_buf[0] = reg | 0x80;
 	spi_transaction_t t;
 	memset(&t, 0, sizeof(t));
@@ -91,7 +95,9 @@ esp_err_t MPU6500::_rd_reg(uint8_t reg, uint8_t num)
 	t.rxlength = t.length;
 	t.tx_buffer = _tx_buf;
 	t.rx_buffer = _rx_buf;
-	return spi_device_transmit(spi_wr, &t);
+	esp_err_t ret = spi_device_transmit(spi_wr, &t);
+	xSemaphoreGiveRecursive(mpu6500_mux);
+	return ret;
 }
 
 void MPU6500::_update_acc_factor()
