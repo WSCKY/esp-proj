@@ -50,16 +50,16 @@ MPU6500::MPU6500(mpu6500_conf_t *mpu_conf)
 	memset(_tx_buf, 0, 15);
 	memset(_rx_buf, 0, 15);
 
-	_wr_reg(0x6B, 0x80);
+	_wr_reg(MPU_ERG_PWRMGT, 0x80);
 	vTaskDelay(10 / portTICK_RATE_MS);
-	_wr_reg(0x68, 0x07);
-	_wr_reg(0x6B, 0x00);
+	_wr_reg(MPU_REG_SGNRST, 0x07);
+	_wr_reg(MPU_ERG_PWRMGT, 0x00);
 	vTaskDelay(10 / portTICK_RATE_MS);
-	_wr_reg(0x19, 0x00);
-	_wr_reg(0x1A, 0x03);
-	_wr_reg(0x1D, 0x06);
-	_wr_reg(0x1C, 0x10);
-	_wr_reg(0x1B, 0x18);
+	_wr_reg(MPU_REG_SMPDIV, 0x00);
+	_wr_reg(MPU_REG_CONFIG, 0x03);
+	_wr_reg(MPU_REG_ACFG_2, 0x06);
+	_wr_reg(MPU_REG_ACCCFG, 0x10);
+	_wr_reg(MPU_REG_GYRCFG, 0x18);
 	vTaskDelay(10 / portTICK_RATE_MS);
 	_acc_fs = acc_fs_8g;
 	_gyr_fs = gyr_fs_2000dps;
@@ -190,12 +190,12 @@ mpu6500_unit_t MPU6500::get_unit()
 esp_err_t MPU6500::set_acc_scale(acc_fs_t scale)
 {
 	MPU_CHECK(scale <= acc_fs_16g, "Invalid param", ESP_ERR_INVALID_ARG);
-	esp_err_t ret = _rd_reg(0x1C, 1);
+	esp_err_t ret = _rd_reg(MPU_REG_ACCCFG, 1);
 	if(ret == ESP_OK) {
 		uint8_t tmp = _rx_buf[1];
 		tmp &= 0xE7;
 		tmp |= (scale << 3);
-		ret = _wr_reg(0x1C, tmp);
+		ret = _wr_reg(MPU_REG_ACCCFG, tmp);
 		if(ret == ESP_OK) {
 			_acc_fs = scale;
 			_update_acc_factor();
@@ -207,12 +207,12 @@ esp_err_t MPU6500::set_acc_scale(acc_fs_t scale)
 esp_err_t MPU6500::set_gyr_scale(gyr_fs_t scale)
 {
 	MPU_CHECK(scale <= gyr_fs_2000dps, "Invalid param", ESP_ERR_INVALID_ARG);
-	esp_err_t ret = _rd_reg(0x1B, 1);
+	esp_err_t ret = _rd_reg(MPU_REG_GYRCFG, 1);
 	if(ret == ESP_OK) {
 		uint8_t tmp = _rx_buf[1];
 		tmp &= 0xE7;
 		tmp |= (scale << 3);
-		ret = _wr_reg(0x1B, tmp);
+		ret = _wr_reg(MPU_REG_GYRCFG, tmp);
 		if(ret == ESP_OK) {
 			_gyr_fs = scale;
 			_update_gyr_factor();
@@ -223,7 +223,7 @@ esp_err_t MPU6500::set_gyr_scale(gyr_fs_t scale)
 
 esp_err_t MPU6500::get_id(uint8_t *id)
 {
-	esp_err_t ret = _rd_reg(0x75, 1);
+	esp_err_t ret = _rd_reg(MPU_REG_WHOAMI, 1);
 	if(ret == ESP_OK)
 		*id = _rx_buf[1];
 	return ret;

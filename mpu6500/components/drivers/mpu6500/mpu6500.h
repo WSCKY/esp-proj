@@ -11,6 +11,8 @@
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 
+#include "mpu6500_reg.h"
+
 /**
  * @brief struct to map GPIO to mpu6500 pins
  */
