@@ -79,6 +79,8 @@ private:
 	mpu6500_raw_t *raw_data = NULL;
 	mpu6500_unit_t *unit_data = NULL;
 	SemaphoreHandle_t mpu6500_mux;
+	void _update_acc_factor();
+	void _update_gyr_factor();
 	void _update_factor();
 	esp_err_t _wr_reg(uint8_t reg, uint8_t val);
 	esp_err_t _rd_reg(uint8_t reg, uint8_t num);
@@ -87,6 +89,7 @@ public:
 	esp_err_t update();
 	mpu6500_raw_t get_raw();
 	mpu6500_unit_t get_unit();
+	esp_err_t set_acc_scale(acc_fs_t scale);
 	esp_err_t get_id(uint8_t *id);
 	virtual ~MPU6500();
 };
