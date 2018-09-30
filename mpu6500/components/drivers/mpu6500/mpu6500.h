@@ -27,20 +27,6 @@ typedef struct {
     int clk_freq;                /*!< spi clock frequency */
 } mpu6500_conf_t;
 
-typedef enum {
-	gyr_fs_250dps = 0,
-	gyr_fs_500dps = 1,
-	gyr_fs_1000dps = 2,
-	gyr_fs_2000dps = 3,
-} gyr_fs_t;
-
-typedef enum {
-	acc_fs_2g = 0,
-	acc_fs_4g = 1,
-	acc_fs_8g = 2,
-	acc_fs_16g = 3,
-} acc_fs_t;
-
 typedef struct {
 	int16_t x, y, z;
 } imu_raw_t;
