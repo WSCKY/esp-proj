@@ -25,5 +25,12 @@
 #define MPU_REG_GYR_ZOUT_H   (0x47)    /* High byte of the Z-axis gyroscope output */
 #define MPU_REG_GYR_ZOUT_L   (0x48)    /* Low byte of the Z-axis gyroscope output */
 
+#define MPU_REG_GYR_X_OFFS_H (0x13)    /* Bits 15 to 8 of the 16-bit offset of X gyroscope */
+#define MPU_REG_GYR_X_OFFS_L (0x14)    /* Bits 7 to 0 of the 16-bit offset of X gyroscope */
+#define MPU_REG_GYR_Y_OFFS_H (0x15)    /* Bits 15 to 8 of the 16-bit offset of Y gyroscope */
+#define MPU_REG_GYR_Y_OFFS_L (0x16)    /* Bits 7 to 0 of the 16-bit offset of Y gyroscope */
+#define MPU_REG_GYR_Z_OFFS_H (0x17)    /* Bits 15 to 8 of the 16-bit offset of Z gyroscope */
+#define MPU_REG_GYR_Z_OFFS_L (0x18)    /* Bits 7 to 0 of the 16-bit offset of Z gyroscope */
+
 #endif /* __MPU6500_REG_H */
 
