@@ -238,6 +238,34 @@ esp_err_t MPU6500::set_gyr_offset(gyr_raw_t *off)
 	return ESP_OK;
 }
 
+esp_err_t MPU6500::set_gyr_dlpf(gyr_dlpf_t dlpf)
+{
+	esp_err_t ret = ESP_OK;
+	ret = _rd_reg(MPU_REG_GYRCFG, 1);
+	if(ret == ESP_OK) {
+		uint8_t tmp = _rx_buf[1];
+		tmp &= ~DLPF_BYPASS_Msk;
+		if(dlpf < GYR_DLPF_BYP_Pos) {
+			// Use DLPF.
+			tmp |= DLPF_BYPASS_Disable;
+			ret = _wr_reg(MPU_REG_GYRCFG, tmp);
+			if(ret == ESP_OK) {
+				ret = _rd_reg(MPU_REG_CONFIG, 1);
+				if(ret == ESP_OK) {
+					tmp = _rx_buf[1];
+					tmp &= ~DLPF_CONFIG_Msk;
+					tmp |= dlpf;
+					ret = _wr_reg(MPU_REG_CONFIG, tmp);
+				}
+			}
+		} else {
+			tmp |= (dlpf - GYR_DLPF_BYP_Pos + 1);
+			ret = _wr_reg(MPU_REG_GYRCFG, tmp);
+		}
+	}
+	return ret;
+}
+
 esp_err_t MPU6500::get_id(uint8_t *id)
 {
 	esp_err_t ret = _rd_reg(MPU_REG_WHOAMI, 1);
