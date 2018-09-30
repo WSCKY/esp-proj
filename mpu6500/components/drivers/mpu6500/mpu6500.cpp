@@ -266,6 +266,17 @@ esp_err_t MPU6500::set_gyr_dlpf(gyr_dlpf_t dlpf)
 	return ret;
 }
 
+esp_err_t MPU6500::set_acc_dlpf(acc_dlpf_t dlpf)
+{
+	esp_err_t ret = ESP_OK;
+	if(dlpf == dlpf_byp_acc_1130hz) {
+		ret = _wr_reg(MPU_REG_ACFG_2, ACC_DLPF_BYP_Msk << ACC_DLPF_BYP_Pos);
+	} else {
+		ret = _wr_reg(MPU_REG_ACFG_2, dlpf << ACC_DLPF_CFG_Pos);
+	}
+	return ret;
+}
+
 esp_err_t MPU6500::get_id(uint8_t *id)
 {
 	esp_err_t ret = _rd_reg(MPU_REG_WHOAMI, 1);
