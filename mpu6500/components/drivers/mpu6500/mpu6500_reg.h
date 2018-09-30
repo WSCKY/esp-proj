@@ -47,6 +47,12 @@
 #define DLPF_CONFIG_Msk      (0x07)    /* DLPF Configuration for Gyro and Temperation, <Configuration> */
 #define DLPF_CONFIG_Pos      (0)
 
+#define ACC_DLPF_BYP_Msk     (0x1)     /* Used to bypass DLPF, <Accelerometer Configuration 2> */
+#define ACC_DLPF_BYP_Pos     (3)
+
+#define ACC_DLPF_CFG_Msk     (0x07)    /* Accelerometer low pass filter setting, <Accelerometer Configuration 2> */
+#define ACC_DLPF_CFG_Pos     (0)
+
 /* mpu6500 configuration */
 typedef enum {
 	gyr_fs_250dps = 0,
@@ -75,6 +81,18 @@ typedef enum {
 	dlpf_byp_bw_3600 = 9,
 } gyr_dlpf_t;
 #define GYR_DLPF_BYP_Pos     dlpf_byp_bw_8800
+
+typedef enum {
+	dlpf_bw_acc_460hz = 0,
+	dlpf_bw_acc_184hz = 1,
+	dlpf_bw_acc_92hz = 2,
+	dlpf_bw_acc_41hz = 3,
+	dlpf_bw_acc_20hz = 4,
+	dlpf_bw_acc_10hz = 5,
+	dlpf_bw_acc_5hz = 6,
+	dlpf_bw_acc_460hz_2 = 7,
+	dlpf_byp_acc_1130hz = 8,
+} acc_dlpf_t;
 
 #endif /* __MPU6500_REG_H */
 
