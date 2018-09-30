@@ -41,19 +41,11 @@
 #define ACC_FS_SEL_Pos       (3)
 
 #define DLPF_BYPASS_Msk      (0x03)    /* Used to bypass DLPF, <Gyroscope Configuration> */
-#define DLPF_BYP_Disable     (0x00)
-#define DLPF_BYP_BW_8800     (0x01)
-#define DLPF_BYP_BW_3600     (0x02)
+#define DLPF_BYPASS_Pos      (0)
+#define DLPF_BYPASS_Disable  (0x00)
 
 #define DLPF_CONFIG_Msk      (0x07)    /* DLPF Configuration for Gyro and Temperation, <Configuration> */
-#define DLPF_CFG_BW_250Hz    (0x00)
-#define DLPF_CFG_BW_184Hz    (0x01)
-#define DLPF_CFG_BW_92Hz     (0x02)
-#define DLPF_CFG_BW_41Hz     (0x03)
-#define DLPF_CFG_BW_20Hz     (0x04)
-#define DLPF_CFG_BW_10Hz     (0x05)
-#define DLPF_CFG_BW_5Hz      (0x06)
-#define DLPF_CFG_BW_3600Hz   (0x07)
+#define DLPF_CONFIG_Pos      (0)
 
 /* mpu6500 configuration */
 typedef enum {
@@ -82,6 +74,7 @@ typedef enum {
 	dlpf_byp_bw_8800 = 8,
 	dlpf_byp_bw_3600 = 9,
 } gyr_dlpf_t;
+#define GYR_DLPF_BYP_Pos     dlpf_byp_bw_8800
 
 #endif /* __MPU6500_REG_H */
 
