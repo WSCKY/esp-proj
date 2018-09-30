@@ -80,6 +80,7 @@ public:
 	esp_err_t set_acc_scale(acc_fs_t scale);
 	esp_err_t set_gyr_scale(gyr_fs_t scale);
 	esp_err_t set_gyr_offset(gyr_raw_t *off);
+	esp_err_t set_gyr_dlpf(gyr_dlpf_t dlpf);
 	esp_err_t get_id(uint8_t *id);
 	virtual ~MPU6500();
 };
