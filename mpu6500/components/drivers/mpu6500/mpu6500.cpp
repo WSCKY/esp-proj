@@ -199,8 +199,8 @@ esp_err_t MPU6500::set_acc_scale(acc_fs_t scale)
 	esp_err_t ret = _rd_reg(MPU_REG_ACCCFG, 1);
 	if(ret == ESP_OK) {
 		uint8_t tmp = _rx_buf[1];
-		tmp &= 0xE7;
-		tmp |= (scale << 3);
+		tmp &= ACC_FS_SEL_Msk;
+		tmp |= (scale << ACC_FS_SEL_Pos);
 		ret = _wr_reg(MPU_REG_ACCCFG, tmp);
 		if(ret == ESP_OK) {
 			_acc_fs = scale;
@@ -216,8 +216,8 @@ esp_err_t MPU6500::set_gyr_scale(gyr_fs_t scale)
 	esp_err_t ret = _rd_reg(MPU_REG_GYRCFG, 1);
 	if(ret == ESP_OK) {
 		uint8_t tmp = _rx_buf[1];
-		tmp &= 0xE7;
-		tmp |= (scale << 3);
+		tmp &= ~GYR_FS_SEL_Msk;
+		tmp |= (scale << GYR_FS_SEL_Pos);
 		ret = _wr_reg(MPU_REG_GYRCFG, tmp);
 		if(ret == ESP_OK) {
 			_gyr_fs = scale;
