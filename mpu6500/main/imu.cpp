@@ -44,6 +44,13 @@ extern "C" void app_main()
   ESP_LOGI(TAG, "set gyr scale to +-1000dps");
   if(imu->set_gyr_scale(gyr_fs_1000dps) != ESP_OK)
 	  ESP_LOGE(TAG, "set gyr scale failed");
+  ESP_LOGI(TAG, "set gyroscope offset");
+  gyr_raw_t offset = {
+    .x = 164,
+	.y = 327,
+	.z = 492,
+  };
+  imu->set_gyr_offset(&offset);
   mpu6500_unit_t data;
   ESP_LOGI(TAG, "measure continuously");
   while(1) {
