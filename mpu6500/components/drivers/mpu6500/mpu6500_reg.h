@@ -1,6 +1,7 @@
 #ifndef __MPU6500_REG_H
 #define __MPU6500_REG_H
 
+/* Registers */
 #define MPU_REG_SMPDIV       (0x19)    /* Sample Rate Divider */
 #define MPU_REG_CONFIG       (0x1A)    /* Configuration */
 #define MPU_REG_GYRCFG       (0x1B)    /* Gyroscope Configuration */
@@ -31,6 +32,56 @@
 #define MPU_REG_GYR_Y_OFFS_L (0x16)    /* Bits 7 to 0 of the 16-bit offset of Y gyroscope */
 #define MPU_REG_GYR_Z_OFFS_H (0x17)    /* Bits 15 to 8 of the 16-bit offset of Z gyroscope */
 #define MPU_REG_GYR_Z_OFFS_L (0x18)    /* Bits 7 to 0 of the 16-bit offset of Z gyroscope */
+
+/* Register bits */
+#define GYR_FS_SEL_Msk       (0x18)    /* Gyro Full Scale Select, <Gyroscope Configuration> */
+#define GYR_FS_SEL_Pos       (3)
+
+#define ACC_FS_SEL_Msk       (0x18)    /* Accel Full Scale Select, <Accelerometer Configuration> */
+#define ACC_FS_SEL_Pos       (3)
+
+#define DLPF_BYPASS_Msk      (0x03)    /* Used to bypass DLPF, <Gyroscope Configuration> */
+#define DLPF_BYP_Disable     (0x00)
+#define DLPF_BYP_BW_8800     (0x01)
+#define DLPF_BYP_BW_3600     (0x02)
+
+#define DLPF_CONFIG_Msk      (0x07)    /* DLPF Configuration for Gyro and Temperation, <Configuration> */
+#define DLPF_CFG_BW_250Hz    (0x00)
+#define DLPF_CFG_BW_184Hz    (0x01)
+#define DLPF_CFG_BW_92Hz     (0x02)
+#define DLPF_CFG_BW_41Hz     (0x03)
+#define DLPF_CFG_BW_20Hz     (0x04)
+#define DLPF_CFG_BW_10Hz     (0x05)
+#define DLPF_CFG_BW_5Hz      (0x06)
+#define DLPF_CFG_BW_3600Hz   (0x07)
+
+/* mpu6500 configuration */
+typedef enum {
+	gyr_fs_250dps = 0,
+	gyr_fs_500dps = 1,
+	gyr_fs_1000dps = 2,
+	gyr_fs_2000dps = 3,
+} gyr_fs_t;
+
+typedef enum {
+	acc_fs_2g = 0,
+	acc_fs_4g = 1,
+	acc_fs_8g = 2,
+	acc_fs_16g = 3,
+} acc_fs_t;
+
+typedef enum {
+	dlpf_bw_250hz = 0,
+	dlpf_bw_184hz = 1,
+	dlpf_bw_92hz = 2,
+	dlpf_bw_41hz = 3,
+	dlpf_bw_20hz = 4,
+	dlpf_bw_10hz = 5,
+	dlpf_bw_5hz = 6,
+	dlpf_bw_3600hz = 7,
+	dlpf_byp_bw_8800 = 8,
+	dlpf_byp_bw_3600 = 9,
+} gyr_dlpf_t;
 
 #endif /* __MPU6500_REG_H */
 
