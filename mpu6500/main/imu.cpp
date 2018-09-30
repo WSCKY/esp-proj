@@ -51,6 +51,9 @@ extern "C" void app_main()
 	.z = 492,
   };
   imu->set_gyr_offset(&offset);
+  ESP_LOGI(TAG, "set gyr dlpf");
+  if(imu->set_gyr_dlpf(dlpf_bw_10hz) != ESP_OK)
+	  ESP_LOGE(TAG, "failed to set gyr dlpf");
   mpu6500_unit_t data;
   ESP_LOGI(TAG, "measure continuously");
   while(1) {
