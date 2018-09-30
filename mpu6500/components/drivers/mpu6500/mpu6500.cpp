@@ -227,6 +227,17 @@ esp_err_t MPU6500::set_gyr_scale(gyr_fs_t scale)
 	return ret;
 }
 
+esp_err_t MPU6500::set_gyr_offset(gyr_raw_t *off)
+{
+	MPU_CHECK(_wr_reg(MPU_REG_GYR_X_OFFS_H, (off->x) >> 8) == ESP_OK, "set offset failed", ESP_FAIL);
+	MPU_CHECK(_wr_reg(MPU_REG_GYR_X_OFFS_L, (off->x) & 0xFF) == ESP_OK, "set offset failed", ESP_FAIL);
+	MPU_CHECK(_wr_reg(MPU_REG_GYR_Y_OFFS_H, (off->y) >> 8) == ESP_OK, "set offset failed", ESP_FAIL);
+	MPU_CHECK(_wr_reg(MPU_REG_GYR_Y_OFFS_L, (off->y) & 0xFF) == ESP_OK, "set offset failed", ESP_FAIL);
+	MPU_CHECK(_wr_reg(MPU_REG_GYR_Z_OFFS_H, (off->z) >> 8) == ESP_OK, "set offset failed", ESP_FAIL);
+	MPU_CHECK(_wr_reg(MPU_REG_GYR_Z_OFFS_L, (off->z) & 0xFF) == ESP_OK, "set offset failed", ESP_FAIL);
+	return ESP_OK;
+}
+
 esp_err_t MPU6500::get_id(uint8_t *id)
 {
 	esp_err_t ret = _rd_reg(MPU_REG_WHOAMI, 1);
