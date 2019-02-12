@@ -83,7 +83,7 @@ CONFIG_MONITOR_BAUD=115200
 #
 # Example Configuration
 #
-CONFIG_BLINK_GPIO=21
+CONFIG_BLINK_GPIO=22
 
 #
 # Partition Table
