@@ -71,7 +71,7 @@ static esp_err_t _lcd_spi_send(spi_device_handle_t spi, spi_transaction_t* t)
     return spi_device_transmit(spi, t); //Transmit!
 }
 
-void lcd_cmd(spi_device_handle_t spi, const uint8_t cmd, lcd_dc_t *dc)
+void lcd_cmd(spi_device_handle_t spi, uint16_t cmd, lcd_dc_t *dc)
 {
     esp_err_t ret;
     dc->dc_level = LCD_CMD_LEV;
@@ -84,7 +84,7 @@ void lcd_cmd(spi_device_handle_t spi, const uint8_t cmd, lcd_dc_t *dc)
     assert(ret == ESP_OK);              // Should have had no issues.
 }
 
-void lcd_data(spi_device_handle_t spi, const uint8_t *data, int len, lcd_dc_t *dc)
+void lcd_data(spi_device_handle_t spi, const void *data, int len, lcd_dc_t *dc)
 {
     esp_err_t ret;
     if (len == 0) {

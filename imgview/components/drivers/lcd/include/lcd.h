@@ -114,9 +114,9 @@ private:
     lcd_dc_t dc;
 
     /*Below are the functions which actually send data, defined in spi_ili.c*/
-    void transmitCmdData(uint8_t cmd, const uint8_t data, uint8_t numDataByte);
+    void transmitCmdData(uint8_t cmd, uint16_t data, uint8_t numDataByte);
     inline void transmitData(uint16_t data);
-    inline void transmitCmdData(uint8_t cmd, uint32_t data);
+    inline void transmitCmdData(uint16_t cmd, uint32_t data);
     inline void transmitData(uint16_t data, int32_t repeats);
     inline void transmitData(uint8_t* data, int length);
     inline void transmitCmd(uint8_t cmd);

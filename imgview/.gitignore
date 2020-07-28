@@ -2,3 +2,7 @@ build/
 sdkconfig
 *.old
 
+# Eclipse project files
+.project
+.cproject
+.settings/

@@ -105,7 +105,7 @@ inline void CMyLcd::transmitData(uint16_t data)
     lcd_data(spi_wr, (uint8_t *)&data, 2, &dc);
     xSemaphoreGiveRecursive(spi_mux);
 }
-inline void CMyLcd::transmitCmdData(uint8_t cmd, uint32_t data)
+inline void CMyLcd::transmitCmdData(uint16_t cmd, uint32_t data)
 {
     xSemaphoreTakeRecursive(spi_mux, portMAX_DELAY);
     lcd_cmd(spi_wr, cmd, &dc);
@@ -131,10 +131,10 @@ inline void CMyLcd::transmitCmd(uint8_t cmd)
     xSemaphoreGiveRecursive(spi_mux);
 }
 
-void CMyLcd::transmitCmdData(uint8_t cmd, const uint8_t data, uint8_t numDataByte)
+void CMyLcd::transmitCmdData(uint8_t cmd, uint16_t data, uint8_t numDataByte)
 {
     xSemaphoreTakeRecursive(spi_mux, portMAX_DELAY);
-    lcd_cmd(spi_wr, (const uint8_t) cmd, &dc);
+    lcd_cmd(spi_wr, cmd, &dc);
     lcd_data(spi_wr, &data, 1, &dc);
     xSemaphoreGiveRecursive(spi_mux);
 }
@@ -516,11 +516,11 @@ int CMyLcd::drawStringSevSeg(const char *string, uint16_t poX, uint16_t poY, uin
 int CMyLcd::drawNumberSevSeg(int long_num, uint16_t poX, uint16_t poY, uint8_t size)
 {
     char tmp[10];
-    if (long_num < 0) {
-        snprintf(tmp, sizeof(tmp), "%d", long_num);
-    } else {
-        snprintf(tmp, sizeof(tmp), "%u", long_num);
-    }
+//    if (long_num < 0) {
+        snprintf((char *)tmp, sizeof(tmp), "%d", long_num);
+//    } else {
+//        snprintf((char *)tmp, sizeof(tmp), "%u", long_num);
+//    }
     return drawStringSevSeg(tmp, poX, poY, size);
 }
 
@@ -584,11 +584,11 @@ int CMyLcd::drawString(const char *string, uint16_t x, uint16_t y)
 int CMyLcd::drawNumber(int long_num, uint16_t poX, uint16_t poY)
 {
     char tmp[10];
-    if (long_num < 0) {
+//    if (long_num < 0) {
         snprintf(tmp, sizeof(tmp), "%d", long_num);
-    } else {
-        snprintf(tmp, sizeof(tmp), "%u", long_num);
-    }
+//    } else {
+//        snprintf(tmp, sizeof(tmp), "%u", long_num);
+//    }
     return drawString(tmp, poX, poY);
 }
 

@@ -18,7 +18,7 @@ Keep in mind that the decoder library cannot handle progressive files (will give
 format if you want to use a different image file.
 */
 
-#include "rom/tjpgd.h"
+#include "esp32/rom/tjpgd.h"
 #include "esp_log.h"
 #include <stdio.h>
 #include <string.h>

@@ -4,7 +4,7 @@
 #
 
 PROJECT_NAME := img_viewer
-USER_PATH := $(abspath $(shell pwd)/)
-include $(USER_PATH)/components/component_conf.mk
+#USER_PATH := $(abspath $(shell pwd)/)
+#include $(USER_PATH)/components/component_conf.mk
 include $(IDF_PATH)/make/project.mk
 

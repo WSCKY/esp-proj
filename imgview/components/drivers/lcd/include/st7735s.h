@@ -35,11 +35,11 @@ void lcd_send_uint16_r(spi_device_handle_t spi, const uint16_t data, int32_t rep
 
 /*Send a command to the ILI9341. Uses spi_device_transmit,
  which waits until the transfer is complete */
-void lcd_cmd(spi_device_handle_t spi, const uint8_t cmd, lcd_dc_t *dc);
+void lcd_cmd(spi_device_handle_t spi, uint16_t cmd, lcd_dc_t *dc);
 
 /*Send data to the ILI9341. Uses spi_device_transmit,
  which waits until the transfer is complete */
-void lcd_data(spi_device_handle_t spi, const uint8_t *data, int len, lcd_dc_t *dc);
+void lcd_data(spi_device_handle_t spi, const void *data, int len, lcd_dc_t *dc);
 
 /** @brief Read LCD IDs using SPI, not working yet
  * The 1st parameter is dummy data.
