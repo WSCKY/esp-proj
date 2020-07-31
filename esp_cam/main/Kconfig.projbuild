@@ -1,4 +1,4 @@
-menu "Camera model"
+menu "Project configuration"
 
 choice CAMERA_BOARD
     prompt "Camera board"
@@ -16,5 +16,32 @@ config M5_CAMERA_X_BOARD
 config M5_CAMERA_F_BOARD
     bool "M5-Camera F"
 endchoice
+
+config CAMERA_WIFI_AP
+    bool
+    prompt "choose WiFi mode in AP"
+    default "y"
+    help
+        WiFi mode selection
+
+choice IMG_TX_PROTOCOL
+    prompt "image transfer protocol"
+    default HTTP_SERVER
+    help
+        choose the image transfer protocol
+config TX_HTTP_SERVER
+    bool "Http server"
+config TX_TCP_SOCKET
+    bool "Socket TCP"
+config TX_UDP_SOCKET
+    bool "Socket UDP"
+endchoice
+
+config EXAMPLE_PORT
+        int "Port"
+        range 0 65535
+        default 3333
+        help
+            Local port the example server will listen on.
 
 endmenu
