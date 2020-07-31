@@ -13,15 +13,21 @@
 #include "esp_timer.h"
 #include "esp_camera.h"
 #include "esp_event_loop.h"
-#include "esp_http_server.h"
 #include "config.h"
 
+#if CONFIG_TX_HTTP_SERVER
+#include "esp_http_server.h"
+#endif /* CONFIG_TX_HTTP_SERVER */
+#if CONFIG_TX_TCP_SOCKET
+#include "lwip/err.h"
+#include "lwip/sockets.h"
+#include "lwip/sys.h"
+#include <lwip/netdb.h>
+#endif /* CONFIG_TX_TCP_SOCKET */
+
 static const char* TAG = "camera";
-#define CAM_USE_WIFI
 
-#define CAM_WIFI_MODE_AP
-
-#ifdef CAM_WIFI_MODE_AP
+#ifdef CONFIG_CAMERA_WIFI_AP
 #define ESP_WIFI_SSID "kyChuCam"
 #define ESP_WIFI_PASS ""
 #else
@@ -33,10 +39,14 @@ static const char* TAG = "camera";
 
 #define MAX_STA_CONN  1
 
+#define PORT CONFIG_EXAMPLE_PORT
+
+#if CONFIG_TX_HTTP_SERVER
 #define PART_BOUNDARY "123456789000000000000987654321"
 static const char* _STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
 static const char* _STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
 static const char* _STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
+#endif /* CONFIG_TX_HTTP_SERVER */
 
 static EventGroupHandle_t s_wifi_event_group;
 static ip4_addr_t s_ip_addr;
@@ -73,7 +83,14 @@ static camera_config_t camera_config = {
 };
 
 static void wifi_init_softap();
+
+#if CONFIG_TX_HTTP_SERVER
 static esp_err_t http_server_init();
+#endif /* CONFIG_TX_HTTP_SERVER */
+
+#if CONFIG_TX_TCP_SOCKET
+static void tcp_server_task(void *pvParameters);
+#endif /* CONFIG_TX_TCP_SOCKET */
 
 void app_main()
 {
@@ -103,16 +120,18 @@ void app_main()
     s->set_hmirror(s, 1);
 #endif
 
-#ifdef CAM_USE_WIFI
     wifi_init_softap();
 
+#if CONFIG_TX_HTTP_SERVER
     vTaskDelay(100 / portTICK_PERIOD_MS);
     http_server_init();
-#endif
+#endif /* CONFIG_TX_HTTP_SERVER */
+#if CONFIG_TX_TCP_SOCKET
+    xTaskCreate(tcp_server_task, "tcp_server", 4096, NULL, 5, NULL);
+#endif /* CONFIG_TX_TCP_SOCKET */
 }
 
-#ifdef CAM_USE_WIFI
-
+#if CONFIG_TX_HTTP_SERVER
 esp_err_t jpg_httpd_handler(httpd_req_t *req){
     camera_fb_t * fb = NULL;
     esp_err_t res = ESP_OK;
@@ -229,6 +248,98 @@ static esp_err_t http_server_init(){
 
     return ESP_OK;
 }
+#endif /* CONFIG_TX_HTTP_SERVER */
+
+#if CONFIG_TX_TCP_SOCKET
+
+static void tcp_server_task(void *pvParameters)
+{
+  uint8_t rx_buffer[5];
+//  char addr_str[128];
+  int addr_family;
+  int ip_protocol;
+  camera_fb_t * fb = NULL;
+
+  struct img_hdr {
+    uint8_t hdr[3];
+    size_t len;
+  } img_header;
+  img_header.hdr[0] = 'i';
+  img_header.hdr[1] = 'm';
+  img_header.hdr[2] = 'g';
+
+  while (1) {
+    struct sockaddr_in dest_addr;
+    dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    dest_addr.sin_family = AF_INET;
+    dest_addr.sin_port = htons(PORT);
+    addr_family = AF_INET;
+    ip_protocol = IPPROTO_IP;
+//    inet_ntoa_r(dest_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
+
+    int listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
+    if (listen_sock < 0) {
+      ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
+      break;
+    }
+    ESP_LOGI(TAG, "Socket created");
+
+    int err = bind(listen_sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+    if (err != 0) {
+      ESP_LOGE(TAG, "Socket unable to bind: errno %d", errno);
+      break;
+    }
+    ESP_LOGI(TAG, "Socket bound, port %d", PORT);
+
+    err = listen(listen_sock, 1);
+    if (err != 0) {
+      ESP_LOGE(TAG, "Error occurred during listen: errno %d", errno);
+      break;
+    }
+    ESP_LOGI(TAG, "Socket listening");
+
+    struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
+    uint addr_len = sizeof(source_addr);
+    int sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
+    if (sock < 0) {
+      ESP_LOGE(TAG, "Unable to accept connection: errno %d", errno);
+      break;
+    }
+    ESP_LOGI(TAG, "Socket accepted");
+
+    while (1) {
+      int len = recv(sock, (char *)rx_buffer, 4, 0);
+      // Error occurred during receiving
+      if (len < 0) {
+        ESP_LOGE(TAG, "recv failed: errno %d", errno);
+        break;
+      }
+      if(rx_buffer[0] == 0xFF && rx_buffer[1] == 'R' && rx_buffer[2] == 'E' && rx_buffer[3] == 'Q') {
+        fb = esp_camera_fb_get();
+//        ESP_LOGI(TAG, "%d", fb->len);
+        if(fb->format == PIXFORMAT_JPEG) {
+          img_header.len = fb->len;
+          len = send(sock, (char *)&img_header, sizeof(struct img_hdr), 0);
+          len = send(sock, fb->buf, fb->len, 0);
+          if (len < 0) {
+            ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
+            esp_camera_fb_return(fb);
+            break;
+          }
+        }
+        esp_camera_fb_return(fb);
+      }
+    }
+    if (sock != -1) {
+      ESP_LOGE(TAG, "Shutting down socket and restarting...");
+      shutdown(sock, 0);
+      close(sock);
+    }
+  }
+  vTaskDelete(NULL);
+}
+
+#endif /* CONFIG_TX_TCP_SOCKET */
 
 static esp_err_t event_handler(void* ctx, system_event_t* event) 
 {
@@ -261,7 +372,7 @@ static esp_err_t event_handler(void* ctx, system_event_t* event)
   return ESP_OK;
 }
 
-#ifdef CAM_WIFI_MODE_AP
+#ifdef CONFIG_CAMERA_WIFI_AP
 
 static void wifi_init_softap() 
 {
@@ -317,6 +428,4 @@ static void wifi_init_softap()
   ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
   ESP_ERROR_CHECK(esp_wifi_start());
 }
-#endif
-
-#endif
+#endif /* CONFIG_CAMERA_WIFI_AP */
